@@ -44,21 +44,13 @@ async function scrapeSearchFeed(query) {
     const { data } = await axios.get(feedUrl);
     const parsed = await parseStringPromise(data);
     if (!parsed.rss.channel[0].item) return { type: 'search', query, results: [] };
-    const items = parsed.rss.channel[0].item;
-    const resultsWithThumbnails = await Promise.all(
-        items.map(async (item) => {
-            try {
-                const animePageUrl = item.link[0];
-                const pageResponse = await axios.get(animePageUrl);
-                const $ = cheerio.load(pageResponse.data);
-                const thumbnail = $('.thumb img').attr('src') || null;
-                return { title: item.title[0], link: animePageUrl, seriesTitle: item.title[0], thumbnail: thumbnail };
-            } catch (error) {
-                return { title: item.title[0], link: item.link[0], seriesTitle: item.title[0], thumbnail: null };
-            }
-        })
-    );
-    return { type: 'search', query, results: resultsWithThumbnails };
+    const results = parsed.rss.channel[0].item.map(item => ({
+        title: item.title[0],
+        link: item.link[0],
+        seriesTitle: item.title[0], 
+        thumbnail: null
+    }));
+    return { type: 'search', query, results };
 }
 
 async function scrapeAnimePage(url) {
