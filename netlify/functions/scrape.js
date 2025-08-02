@@ -19,13 +19,10 @@ exports.handler = async function (event, context) {
     }
 };
 
-// ===== FUNGSI INI DIPERBARUI DENGAN LOGIKA BARU =====
 async function scrapeHomePage() {
     const { data } = await axios.get(BASE_URL);
     const $ = cheerio.load(data);
     const latestReleases = [];
-    
-    // Logika baru: cari header "Latest Release", lalu ambil semua item di dalamnya
     const latestReleaseBox = $('.releases.latesthome').parent('.bixbox');
     latestReleaseBox.find('article.bs').each((i, el) => {
         const element = $(el);
@@ -35,7 +32,6 @@ async function scrapeHomePage() {
         const link = linkElement.attr('href');
         const thumbnail = element.find('img').attr('src');
         const episode = element.find('.epx').text().trim();
-
         if (seriesTitle && link) {
             latestReleases.push({ seriesTitle, link, thumbnail, episode });
         }
@@ -43,7 +39,6 @@ async function scrapeHomePage() {
     return { type: 'latest', results: latestReleases };
 }
 
-// --- FUNGSI LAINNYA TIDAK BERUBAH ---
 async function scrapeSearchFeed(query) {
     const feedUrl = `${BASE_URL}/search/${encodeURIComponent(query)}/feed/rss2/`;
     const { data } = await axios.get(feedUrl);
@@ -57,14 +52,15 @@ async function scrapeSearchFeed(query) {
                 const pageResponse = await axios.get(animePageUrl);
                 const $ = cheerio.load(pageResponse.data);
                 const thumbnail = $('.thumb img').attr('src') || null;
-                return { title: item.title[0], link: animePageUrl, thumbnail: thumbnail };
+                return { title: item.title[0], link: animePageUrl, seriesTitle: item.title[0], thumbnail: thumbnail };
             } catch (error) {
-                return { title: item.title[0], link: item.link[0], thumbnail: null };
+                return { title: item.title[0], link: item.link[0], seriesTitle: item.title[0], thumbnail: null };
             }
         })
     );
     return { type: 'search', query, results: resultsWithThumbnails };
 }
+
 async function scrapeAnimePage(url) {
     const { data } = await axios.get(url);
     const $ = cheerio.load(data);
@@ -77,6 +73,7 @@ async function scrapeAnimePage(url) {
     const episodeCount = episodes.length;
     return { type: 'animePage', episodes, thumbnail, episodeCount };
 }
+
 async function scrapeEpisodePage(episodeUrl) {
     const { data } = await axios.get(episodeUrl);
     const $ = cheerio.load(data);
