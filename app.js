@@ -2,8 +2,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const app = document.getElementById('app-content');
     const bottomNav = document.querySelector('.bottom-nav');
 
-    // GANTI DENGAN URL NETLIFY-MU
+    // ##################################################################
+    // ## PENTING! GANTI URL DI BAWAH INI DENGAN URL NETLIFY-MU! ##
+    // ##################################################################
     const API_URL = "https://bubuwi-pro.netlify.app/api/scrape";
+    // ##################################################################
 
     const templates = {
         loader: () => `<p class="loader">Loading...</p>`,
@@ -15,18 +18,18 @@ document.addEventListener('DOMContentLoaded', () => {
             <form id="search-form"><input type="search" id="search-input" placeholder="Ketik judul anime..."></form>
             <div id="search-results" class="anime-grid"></div>`,
         contactPage: () => `
-    <div class="contact-container">
-        <div class="page-title">Kontak Developer</div>
-        <img src="icons/icon-192x192.png" alt="Logo Bubuwi" class="contact-page-logo">
-        <a href="https://www.instagram.com/adnanmwa" target="_blank" class="contact-link">
-            <img src="https://upload.wikimedia.org/wikipedia/commons/a/a5/Instagram_icon.png" alt="Instagram">
-            <span>@adnanmwa</span>
-        </a>
-        <a href="https://www.tiktok.com/@adnansagiri" target="_blank" class="contact-link">
-            <img src="https://sf-static.tiktokcdn.com/obj/tiktok-web/tiktok/web/node/_next/static/images/logo-dark-e95da587b6efa1520d8f332845c23067.svg" alt="TikTok">
-            <span>@adnansagiri</span>
-        </a>
-    </div>`
+            <div class="contact-container">
+                <div class="page-title">Kontak Developer</div>
+                <img src="https://i.imgur.com/9uK2OPw.png" alt="Logo Bubuwi" class="contact-page-logo">
+                <a href="https://www.instagram.com/adnanmwa" target="_blank" class="contact-link">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/a/a5/Instagram_icon.png" alt="Instagram">
+                    <span>@adnanmwa</span>
+                </a>
+                <a href="https://www.tiktok.com/@adnansagiri" target="_blank" class="contact-link">
+                    <img src="https://sf-static.tiktokcdn.com/obj/tiktok-web/tiktok/web/node/_next/static/images/logo-dark-e95da587b6efa1520d8f332845c23067.svg" alt="TikTok">
+                    <span>@adnansagiri</span>
+                </a>
+            </div>`,
         detailPage: (data, title, thumbnail) => `
             <div class="detail-header">
                 <img src="${thumbnail}" alt="${title}">
@@ -54,6 +57,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 let content = '';
                 if (page === 'home') {
                     const data = await fetch(API_URL).then(res => res.json());
+                    if (!data.results || data.results.length === 0) throw new Error("API tidak mengembalikan hasil.");
                     content = templates.homePage(data);
                 } else if (page === 'search') {
                     content = templates.searchPage();
@@ -61,7 +65,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     content = templates.contactPage();
                 }
                 app.innerHTML = content;
-            } catch (e) { app.innerHTML = `<p>Gagal memuat. Coba lagi.</p>`; }
+            } catch (e) { app.innerHTML = `<p>Gagal memuat. Periksa URL API di app.js atau coba lagi. (${e.message})</p>`; }
         }
     };
 
