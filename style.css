@@ -1,0 +1,135 @@
+:root {
+    --bg-primary: #0a0e1a;
+    --bg-card: rgba(22, 28, 49, 0.7);
+    --text-primary: #e0e0ff;
+    --accent-primary: #8a2be2;
+    --glow-color: rgba(138, 43, 226, 0.5);
+    --border-color: rgba(255, 255, 255, 0.1);
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'Poppins', sans-serif; /* Font indah ala space */
+    background-color: var(--bg-primary);
+    background-image: url('https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQp9Mnlk9EIAcJEooyOdYJedOwAaIOLBNGiym8WjYLOjTitSUmYBnGviFM&s=10');
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+    color: var(--text-primary);
+    overflow-x: hidden;
+}
+
+/* Latar Belakang & Animasi */
+.background-stars, .shooting-star, .planet {
+    position: fixed;
+    z-index: -1;
+}
+.background-stars {
+    top: 0; left: 0; width: 200%; height: 100%;
+    background: transparent url('https://www.transparenttextures.com/patterns/stardust.png');
+    animation: move-stars 120s linear infinite;
+}
+@keyframes move-stars {
+    from { transform: translateX(0); } to { transform: translateX(-50%); }
+}
+.shooting-star {
+    top: -10%; left: 50%; width: 2px; height: 80px;
+    background: linear-gradient(to bottom, rgba(255, 255, 255, 0.8), transparent);
+    filter: drop-shadow(0 0 6px white);
+    animation: fall 10s linear infinite;
+}
+.shooting-star:nth-child(2) { left: 10%; animation-delay: 2s; animation-duration: 8s; }
+.shooting-star:nth-child(3) { left: 80%; animation-delay: 5s; animation-duration: 12s; }
+@keyframes fall {
+    0% { transform: rotate(45deg) translateY(-200px) translateX(0); opacity: 1; }
+    100% { transform: rotate(45deg) translateY(calc(100vh + 200px)) translateX(calc(100vw + 200px)); opacity: 0; }
+}
+
+/* Dekorasi Planet (Parallax) */
+.planet { transition: transform 0.2s ease-out; }
+.saturn { width: 200px; top: 10%; right: 5%; }
+.earth { width: 150px; bottom: 5%; left: 2%; }
+
+/* Layout Utama */
+.container { max-width: 800px; margin: 0 auto; padding: 2rem; }
+.main-header {
+    display: flex; align-items: center; justify-content: center;
+    gap: 1rem; margin-bottom: 2rem; text-align: center;
+}
+.logo { width: 60px; height: 60px; }
+.main-header h1 { font-size: 2.5rem; text-shadow: 0 0 10px var(--glow-color); }
+#app-content {
+    background: rgba(10, 14, 26, 0.6);
+    backdrop-filter: blur(10px);
+    padding: 2rem; border-radius: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Konten Dinamis */
+.loader { text-align: center; font-size: 1.2rem; }
+#search-form { margin-bottom: 2rem; }
+#search-input {
+    width: 100%; padding: 1rem; font-size: 1.1rem;
+    border-radius: 15px; border: 2px solid var(--border-color);
+    background: var(--bg-card); color: var(--text-primary); text-align: center;
+}
+.anime-grid {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 1.5rem;
+}
+.anime-card {
+    background: var(--bg-card); border-radius: 15px;
+    overflow: hidden; text-decoration: none;
+    color: var(--text-primary); border: 1px solid var(--border-color);
+    transition: transform 0.3s, box-shadow 0.3s;
+}
+.anime-card:hover { transform: translateY(-10px); box-shadow: 0 10px 20px var(--glow-color); }
+.anime-card img { width: 100%; aspect-ratio: 10 / 14; object-fit: cover; }
+.anime-card .title { padding: 1rem; font-weight: 600; }
+
+/* Halaman Detail & Nonton */
+.back-button {
+    background: var(--accent-primary); color: white; border: none;
+    padding: 0.75rem 1.5rem; border-radius: 10px; font-weight: 600;
+    cursor: pointer; margin-bottom: 2rem;
+}
+.detail-header { display: flex; gap: 1.5rem; align-items: center; margin-bottom: 2rem; }
+.detail-header img { width: 150px; border-radius: 10px; }
+.detail-info h2 { font-size: 2rem; margin-bottom: 0.5rem; }
+.episode-card {
+    background: var(--bg-card); padding: 1rem;
+    border-radius: 10px; margin-bottom: 1rem;
+    text-decoration: none; color: var(--text-primary);
+    display: block; transition: background-color 0.2s;
+}
+.episode-card:hover { background-color: var(--accent-primary); }
+
+/* Pemain Video Cerdas */
+.watch-title { font-size: 1.5rem; margin-bottom: 1rem; }
+.video-placeholder {
+    position: relative; width: 100%; aspect-ratio: 16 / 9;
+    background-color: #000; border-radius: 12px;
+    overflow: hidden; cursor: pointer; display: flex;
+    align-items: center; justify-content: center;
+    background-size: cover; background-position: center;
+}
+.video-placeholder::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0, 0, 0, 0.4);
+}
+.play-button {
+    width: 70px; height: 70px; background-color: rgba(0, 0, 0, 0.7);
+    border-radius: 50%; display: flex; align-items: center;
+    justify-content: center; border: 2px solid white;
+    z-index: 1; transition: transform 0.2s;
+}
+.video-placeholder:hover .play-button { transform: scale(1.1); }
+.play-button svg { width: 30px; height: 30px; fill: white; margin-left: 5px; }
+.video-container iframe {
+    width: 100%; aspect-ratio: 16 / 9;
+    border: none; border-radius: 12px;
+}

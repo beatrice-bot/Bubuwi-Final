@@ -1,0 +1,10 @@
+{
+  "name": "bubuwi-pwa-backend",
+  "version": "1.0.0",
+  "description": "Scraper untuk Bubuwi PWA",
+  "dependencies": {
+    "axios": "^1.7.2",
+    "cheerio": "^1.0.0-rc.12",
+    "xml2js": "^0.6.2"
+  }
+}

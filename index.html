@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bubuwi</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="style.css">
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#0a0e1a">
+</head>
+<body>
+    <div class="background-stars"></div>
+    <div class="shooting-star"></div>
+    <div class="shooting-star"></div>
+    <div class="shooting-star"></div>
+
+    <img src="https://pngimg.com/uploads/saturn/saturn_PNG15.png" alt="Saturn" class="planet saturn">
+    <img src="https://www.pngall.com/wp-content/uploads/2016/06/Earth-Free-Download-PNG.png" alt="Earth" class="planet earth">
+
+    <div class="container">
+        <main id="app-content">
+            </main>
+    </div>
+
+    <script src="app.js"></script>
+    <script>
+        // Mendaftarkan Service Worker untuk PWA
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js').then(reg => console.log('SW Registered')).catch(err => console.log('SW Error', err));
+            });
+        }
+    </script>
+</body>
+</html>
