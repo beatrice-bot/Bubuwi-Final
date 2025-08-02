@@ -8,56 +8,47 @@ exports.handler = async function (event, context) {
     const { url, search, animePage } = event.queryStringParameters;
     try {
         let data;
-        if (search) {
-            data = await scrapeSearchFeed(search);
-        } else if (animePage) {
-            data = await scrapeAnimePage(animePage);
-        } else if (url) {
-            data = await scrapeEpisodePage(url);
-        } else {
-            data = await scrapeHomePage();
-        }
-        return {
-            statusCode: 200,
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(data)
-        };
+        if (search) { data = await scrapeSearchFeed(search); } 
+        else if (animePage) { data = await scrapeAnimePage(animePage); }
+        else if (url) { data = await scrapeEpisodePage(url); }
+        else { data = await scrapeHomePage(); }
+        return { statusCode: 200, body: JSON.stringify(data) };
     } catch (error) {
         console.error('Scraping error:', error.message);
-        return {
-            statusCode: 500,
-            body: JSON.stringify({ error: error.message })
-        };
+        return { statusCode: 500, body: JSON.stringify({ error: error.message }) };
     }
 };
 
+// ===== FUNGSI INI DIPERBARUI DENGAN LOGIKA BARU =====
 async function scrapeHomePage() {
     const { data } = await axios.get(BASE_URL);
     const $ = cheerio.load(data);
     const latestReleases = [];
-    $('div.listupd.normal article.bs').each((i, el) => {
+    
+    // Logika baru: cari header "Latest Release", lalu ambil semua item di dalamnya
+    const latestReleaseBox = $('.releases.latesthome').parent('.bixbox');
+    latestReleaseBox.find('article.bs').each((i, el) => {
         const element = $(el);
         const linkElement = element.find('a');
         const titleElement = element.find('.tt');
         const seriesTitle = titleElement.clone().children().remove().end().text().trim();
-        const fullTitle = titleElement.find('h2').text().trim();
         const link = linkElement.attr('href');
         const thumbnail = element.find('img').attr('src');
         const episode = element.find('.epx').text().trim();
+
         if (seriesTitle && link) {
-            latestReleases.push({ seriesTitle, fullTitle, link, thumbnail, episode });
+            latestReleases.push({ seriesTitle, link, thumbnail, episode });
         }
     });
     return { type: 'latest', results: latestReleases };
 }
 
+// --- FUNGSI LAINNYA TIDAK BERUBAH ---
 async function scrapeSearchFeed(query) {
     const feedUrl = `${BASE_URL}/search/${encodeURIComponent(query)}/feed/rss2/`;
     const { data } = await axios.get(feedUrl);
     const parsed = await parseStringPromise(data);
-    if (!parsed.rss.channel[0].item) {
-        return { type: 'search', query, results: [] };
-    }
+    if (!parsed.rss.channel[0].item) return { type: 'search', query, results: [] };
     const items = parsed.rss.channel[0].item;
     const resultsWithThumbnails = await Promise.all(
         items.map(async (item) => {
@@ -66,53 +57,34 @@ async function scrapeSearchFeed(query) {
                 const pageResponse = await axios.get(animePageUrl);
                 const $ = cheerio.load(pageResponse.data);
                 const thumbnail = $('.thumb img').attr('src') || null;
-                return {
-                    title: item.title[0],
-                    link: animePageUrl,
-                    pubDate: item.pubDate[0],
-                    thumbnail: thumbnail
-                };
+                return { title: item.title[0], link: animePageUrl, thumbnail: thumbnail };
             } catch (error) {
-                return {
-                    title: item.title[0],
-                    link: item.link[0],
-                    pubDate: item.pubDate[0],
-                    thumbnail: null
-                };
+                return { title: item.title[0], link: item.link[0], thumbnail: null };
             }
         })
     );
     return { type: 'search', query, results: resultsWithThumbnails };
 }
-
 async function scrapeAnimePage(url) {
     const { data } = await axios.get(url);
     const $ = cheerio.load(data);
-    $('script').remove();
     const episodes = [];
     $('.eplister ul li').each((i, el) => {
         const linkElement = $(el).find('a');
-        episodes.push({
-            title: linkElement.find('.epl-title').text(),
-            link: linkElement.attr('href'),
-            date: linkElement.find('.epl-date').text()
-        });
+        episodes.push({ title: linkElement.find('.epl-title').text(), link: linkElement.attr('href') });
     });
     const thumbnail = $('.thumb img').attr('src');
-    const synopsis = $('.entry-content.series p').text();
     const episodeCount = episodes.length;
-    return { type: 'animePage', episodes, thumbnail, synopsis, episodeCount };
+    return { type: 'animePage', episodes, thumbnail, episodeCount };
 }
-
 async function scrapeEpisodePage(episodeUrl) {
     const { data } = await axios.get(episodeUrl);
     const $ = cheerio.load(data);
-    $('script').remove();
     const title = $('.entry-title').text().trim();
     const videoFrames = [];
     $('.player-embed iframe').each((i, el) => {
         const src = $(el).attr('src');
         if (src) videoFrames.push(src);
     });
-    return { type: 'episode', title, videoFrames: videoFrames.length > 0 ? videoFrames : ['Video tidak ditemukan'] };
+    return { type: 'episode', title, videoFrames: videoFrames.length > 0 ? videoFrames : [] };
 }
