@@ -2,11 +2,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const app = document.getElementById('app-content');
     const bottomNav = document.querySelector('.bottom-nav');
 
-    // ##################################################################
-    // ## PENTING! GANTI URL DI BAWAH INI DENGAN URL NETLIFY-MU! ##
-    // ##################################################################
+    // GANTI DENGAN URL NETLIFY-MU
     const API_URL = "https://bubuwi-pro.netlify.app/api/scrape";
-    // ##################################################################
 
     const templates = {
         loader: () => `<p class="loader">Loading...</p>`,
@@ -87,9 +84,23 @@ document.addEventListener('DOMContentLoaded', () => {
         resultsContainer.innerHTML = (data.results || []).map(templates.searchResultCard).join('');
     };
 
-    const handleDetail = async (link, title, thumbnail) => {
+    // ===== FUNGSI INI DIPERBARUI DENGAN LOGIKA BARU =====
+    const handleDetail = async (link, title, thumbnail, isFromHome = false) => {
         app.innerHTML = templates.loader();
-        const data = await fetch(`${API_URL}?animePage=${encodeURIComponent(link)}`).then(res => res.json());
+        let detailLink = link;
+
+        // Jika diklik dari Halaman Utama, lakukan pencarian dulu untuk mendapatkan link halaman anime
+        if (isFromHome) {
+            const searchData = await fetch(`${API_URL}?search=${encodeURIComponent(title)}`).then(res => res.json());
+            if (searchData.results && searchData.results.length > 0) {
+                detailLink = searchData.results[0].link; // Ambil link dari hasil pencarian pertama
+            } else {
+                app.innerHTML = `<p>Gagal menemukan halaman detail untuk ${title}.</p>`;
+                return;
+            }
+        }
+
+        const data = await fetch(`${API_URL}?animePage=${encodeURIComponent(detailLink)}`).then(res => res.json());
         const finalThumbnail = thumbnail !== 'null' && thumbnail ? thumbnail : data.thumbnail;
         app.innerHTML = templates.detailPage(data, title, finalThumbnail);
     };
@@ -109,7 +120,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
     app.addEventListener('click', e => {
         const card = e.target.closest('.anime-card, .search-result-card');
-        if (card) { e.preventDefault(); handleDetail(card.dataset.link, card.dataset.title, card.dataset.thumbnail); }
+        if (card) {
+            e.preventDefault();
+            const isFromHome = card.parentElement.classList.contains('anime-grid'); // Cek apakah kartu ada di grid halaman utama
+            handleDetail(card.dataset.link, card.dataset.title, card.dataset.thumbnail, isFromHome);
+        }
         const epCard = e.target.closest('.episode-card');
         if (epCard) { e.preventDefault(); handleWatch(epCard.dataset.link); }
     });
