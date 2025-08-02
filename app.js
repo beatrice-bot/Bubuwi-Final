@@ -16,7 +16,7 @@ document.addEventListener('DOMContentLoaded', () => {
         searchPage: () => `
             <div class="page-title">Pencarian</div>
             <form id="search-form"><input type="search" id="search-input" placeholder="Ketik judul anime..."></form>
-            <div id="search-results" class="anime-grid"></div>`,
+            <div id="search-results"></div>`,
         contactPage: () => `
             <div class="contact-container">
                 <div class="page-title">Kontak Developer</div>
@@ -26,10 +26,20 @@ document.addEventListener('DOMContentLoaded', () => {
                     <span>@adnanmwa</span>
                 </a>
                 <a href="https://www.tiktok.com/@adnansagiri" target="_blank" class="contact-link">
-                    <img src="https://sf-static.tiktokcdn.com/obj/tiktok-web/tiktok/web/node/_next/static/images/logo-dark-e95da587b6efa1520d8f332845c23067.svg" alt="TikTok">
+                    <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQNxuydAoOVzXmO6EXy6vZhaJ17jCGvYKITEzu7BNMYkEaux6HqKvnQax0Q&s=10" alt="TikTok">
                     <span>@adnansagiri</span>
                 </a>
             </div>`,
+        animeCard: (anime) => `
+            <a href="#" class="anime-card" data-link="${anime.link}" data-title="${anime.seriesTitle || anime.title}" data-thumbnail="${anime.thumbnail}">
+                ${anime.episode ? `<div class="episode-badge">${anime.episode}</div>` : ''}
+                <img src="${anime.thumbnail}" alt="${anime.seriesTitle || anime.title}">
+                <div class="title">${anime.seriesTitle || anime.title}</div>
+            </a>`,
+        searchResultCard: (anime) => `
+            <a href="#" class="search-result-card" data-link="${anime.link}" data-title="${anime.title}" data-thumbnail="${anime.thumbnail}">
+                ${anime.title}
+            </a>`,
         detailPage: (data, title, thumbnail) => `
             <div class="detail-header">
                 <img src="${thumbnail}" alt="${title}">
@@ -74,13 +84,14 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!resultsContainer) return;
         resultsContainer.innerHTML = templates.loader();
         const data = await fetch(`${API_URL}?search=${encodeURIComponent(query)}`).then(res => res.json());
-        resultsContainer.innerHTML = (data.results || []).map(templates.animeCard).join('');
+        resultsContainer.innerHTML = (data.results || []).map(templates.searchResultCard).join('');
     };
 
     const handleDetail = async (link, title, thumbnail) => {
         app.innerHTML = templates.loader();
         const data = await fetch(`${API_URL}?animePage=${encodeURIComponent(link)}`).then(res => res.json());
-        app.innerHTML = templates.detailPage(data, title, thumbnail);
+        const finalThumbnail = thumbnail !== 'null' && thumbnail ? thumbnail : data.thumbnail;
+        app.innerHTML = templates.detailPage(data, title, finalThumbnail);
     };
 
     const handleWatch = async (link) => {
@@ -97,7 +108,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     app.addEventListener('click', e => {
-        const card = e.target.closest('.anime-card');
+        const card = e.target.closest('.anime-card, .search-result-card');
         if (card) { e.preventDefault(); handleDetail(card.dataset.link, card.dataset.title, card.dataset.thumbnail); }
         const epCard = e.target.closest('.episode-card');
         if (epCard) { e.preventDefault(); handleWatch(epCard.dataset.link); }
