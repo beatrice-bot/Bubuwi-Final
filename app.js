@@ -117,23 +117,23 @@ document.addEventListener('DOMContentLoaded', () => {
             </div>`,
             
         subscribePage: () => {
-            const subscriptions = JSON.parse(localStorage.getItem('subscriptions') || '[]');
-            return `
-                <div class="page-title">Anime Berlangganan</div>
-                <div class="subscription-grid">
-                    ${subscriptions.length > 0 ? 
-                        subscriptions.map(sub => `
-                            <div class="subscription-card" data-url="${sub.url}">
-                                <img src="${sub.thumbnail}" alt="${sub.title}">
-                                <div class="subscription-info">
-                                    <h3>${sub.title}</h3>
-                                </div>
-                            </div>
-                        `).join('') : 
-                        '<div class="empty-state"><p>Belum ada anime yang disubscribe</p></div>'
-                    }
-                </div>`;
-        },
+    const subscriptions = JSON.parse(localStorage.getItem('subscriptions') || '[]');
+    return `
+        <div class="page-title">Anime Berlangganan</div>
+        <div class="subscription-grid">
+            ${subscriptions.length > 0 ? 
+                subscriptions.map(sub => `
+                    <div class="subscription-card" data-title="${sub.title}">
+                        <img src="${sub.thumbnail}" alt="${sub.title}">
+                        <div class="subscription-info">
+                            <h3>${sub.title}</h3>
+                        </div>
+                    </div>
+                `).join('') : 
+                '<div class="empty-state"><p>Belum ada anime yang disubscribe</p></div>'
+            }
+        </div>`;
+},
         
         accountPage: () => `
             <div class="page-title">Akun</div>
@@ -194,65 +194,86 @@ document.addEventListener('DOMContentLoaded', () => {
             </a>`,
             
         detailPage: (data, title, thumbnail) => {
-            const isSubscribed = isAnimeSubscribed(title);
-            const animeSlug = title.toLowerCase().replace(/[^a-z0-9]/g, '-');
-            return `
-                <div class="detail-header">
-                    <img src="${thumbnail}" alt="${title}">
-                    <div class="detail-info">
-                        <h2>${title}</h2>
-                        <p>Total Episode: ${data.episodeCount || '?'}</p>
-                        <button id="subscribe-btn" class="subscribe-btn ${isSubscribed ? 'subscribed' : ''}" 
-                                data-title="${title}" data-thumbnail="${thumbnail}" data-url="/${animeSlug}-pilih-episode">
-                            <span class="btn-text">${isSubscribed ? 'Tersubscribe' : 'Subscribe'}</span>
-                            <span class="btn-icon">${isSubscribed ? '✓' : '+'}</span>
-                        </button>
-                    </div>
+    const isSubscribed = isAnimeSubscribed(title);
+    // Perbaikan kecil di slug Anda, Anda salah ketik `a-z0-n` (seharusnya `a-z0-9`)
+    const animeSlug = title.toLowerCase().replace(/[^a-z0-9]/g, '-'); 
+
+    return `
+        <div class="fancy-detail-header" style="background-image: url('${thumbnail}')">
+            <div class="header-overlay"></div>
+            <div class="header-content">
+                <img src="${thumbnail}" alt="${title}" class="header-poster">
+                <div class="header-info">
+                    <h2>${title}</h2>
+                    <p>Total Episode: ${data.episodeCount || '?'}</p>
+                    <button id="subscribe-btn" class="subscribe-btn ${isSubscribed ? 'subscribed' : ''}">
+                        <span class="btn-icon">${isSubscribed ? '✓' : '+'}</span>
+                        <span class="btn-text">${isSubscribed ? 'Tersubscribe' : 'Subscribe'}</span>
+                    </button>
                 </div>
-                <div class="episode-list">
-                    ${(data.episodes || []).map((ep, index) => `
-                        <a href="#" class="episode-card" data-link="${ep.link}" data-episode-index="${index}">
-                            <h3>${ep.title}</h3>
-                        </a>
-                    `).join('')}
-                </div>`;
-        },
+            </div>
+        </div>
+
+        <div class="page-title-section">
+            <h3 class="section-title">Daftar Episode</h3>
+        </div>
+
+        <div class="fancy-episode-list">
+            ${(data.episodes || []).map((ep, index) => `
+                <a href="#" class="fancy-episode-card" data-link="${ep.link}" data-episode-index="${index}">
+                    <div class="ep-icon">
+                        <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                    </div>
+                    <h3 class="ep-title">${ep.title}</h3>
+                </a>
+            `).join('')}
+        </div>`;
+},
+
         
         watchPage: (data, episodeIndex = 0) => {
-            const episodes = currentAnimeData?.episodes || [];
-            const currentEp = episodes[episodeIndex];
-            const hasPrev = episodeIndex > 0;
-            const hasNext = episodeIndex < episodes.length - 1;
-            
-            return `
-                <div class="watch-header">
-                    <button id="back-to-detail" class="back-btn">
-                        <svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
-                        Kembali
-                    </button>
-                    <h2 class="episode-title">${data.title}</h2>
-                </div>
-                <div class="video-container">
-                    <iframe src="${data.videoFrames ? data.videoFrames[0] : ''}" allowfullscreen></iframe>
-                </div>
-                <div class="episode-controls">
-                    <button id="prev-episode" class="episode-nav-btn ${!hasPrev ? 'disabled' : ''}" ${!hasPrev ? 'disabled' : ''}>
-                        <svg viewBox="0 0 24 24"><path d="M15.41 16.59L10.83 12l4.58-4.59L14 6l-6 6 6 6 1.41-1.41z"/></svg>
-                        Prev
-                    </button>
-                    <button id="next-episode" class="episode-nav-btn ${!hasNext ? 'disabled' : ''}" ${!hasNext ? 'disabled' : ''}>
-                        Next
-                        <svg viewBox="0 0 24 24"><path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6-1.41-1.41z"/></svg>
-                    </button>
-                </div>
-                <div class="episode-grid">
+    const episodes = currentAnimeData?.episodes || [];
+    const currentEp = episodes[episodeIndex];
+    const hasPrev = episodeIndex > 0;
+    const hasNext = episodeIndex < episodes.length - 1;
+
+    return `
+        <div class="fancy-watch-container">
+            <div class="video-container">
+                <iframe src="${data.videoFrames ? data.videoFrames[0] : ''}" allowfullscreen></iframe>
+            </div>
+
+            <div class="watch-info-header">
+                <button id="back-to-detail" class="back-btn">
+                    <svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
+                </button>
+                <h2 class="episode-title">${data.title}</h2>
+            </div>
+
+            <div class="episode-controls">
+                <button id="prev-episode" class="episode-nav-btn ${!hasPrev ? 'disabled' : ''}" ${!hasPrev ? 'disabled' : ''}>
+                    <svg viewBox="0 0 24 24"><path d="M15.41 16.59L10.83 12l4.58-4.59L14 6l-6 6 6 6 1.41-1.41z"/></svg>
+                    Prev
+                </button>
+                <button id="next-episode" class="episode-nav-btn ${!hasNext ? 'disabled' : ''}" ${!hasNext ? 'disabled' : ''}>
+                    Next
+                    <svg viewBox="0 0 24 24"><path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6-1.41-1.41z"/></svg>
+                </button>
+            </div>
+
+            <h3 class="section-title-small">Pilih Episode</h3>
+            <div class="fancy-episode-grid">
+                <div class="fancy-episode-scroll">
                     ${episodes.map((ep, index) => `
-                        <div class="episode-grid-item ${index === episodeIndex ? 'active' : ''}" data-episode-index="${index}">
+                        <div class="fancy-episode-grid-item ${index === episodeIndex ? 'active' : ''}" data-episode-index="${index}">
                             ${index + 1}
                         </div>
                     `).join('')}
-                </div>`;
-        },
+                </div>
+            </div>
+        </div>`;
+},
+
         
         bottomNav: (activePage) => `
             <button class="nav-button ${activePage === 'home' ? 'active' : ''}" data-page="home">
@@ -370,23 +391,31 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     const isAnimeSubscribed = (title) => {
-        const subscriptions = JSON.parse(localStorage.getItem('subscriptions') || '[]');
-        return subscriptions.some(sub => sub.title === title);
-    };
+    const subscriptions = JSON.parse(localStorage.getItem('subscriptions') || '[]');
+    return subscriptions.some(sub => sub.title === title);
+};
 
-    const toggleSubscription = (title, thumbnail, url) => {
-        let subscriptions = JSON.parse(localStorage.getItem('subscriptions') || '[]');
-        const existingIndex = subscriptions.findIndex(sub => sub.title === title);
-        
-        if (existingIndex > -1) {
-            subscriptions.splice(existingIndex, 1);
-        } else {
-            subscriptions.push({ title, thumbnail, url });
-        }
-        
-        localStorage.setItem('subscriptions', JSON.stringify(subscriptions));
-        return existingIndex === -1;
-    };
+    const toggleSubscription = () => {
+    if (!currentAnimeData) return false; // Jangan lakukan apa-apa jika data tidak ada
+
+    let subscriptions = JSON.parse(localStorage.getItem('subscriptions') || '[]');
+    const title = currentAnimeData.title;
+    const existingIndex = subscriptions.findIndex(sub => sub.title === title);
+
+    let isNowSubscribed;
+    if (existingIndex > -1) {
+        // Unsubscribe: Hapus dari array
+        subscriptions.splice(existingIndex, 1);
+        isNowSubscribed = false;
+    } else {
+        // Subscribe: Simpan seluruh data anime yang sedang dilihat
+        subscriptions.push(currentAnimeData);
+        isNowSubscribed = true;
+    }
+
+    localStorage.setItem('subscriptions', JSON.stringify(subscriptions));
+    return isNowSubscribed;
+};
 
     // Event Listeners
     app.addEventListener('submit', e => {
@@ -412,12 +441,22 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         // Handle subscription cards
-        const subCard = e.target.closest('.subscription-card');
-        if (subCard) {
-            e.preventDefault();
-            window.location.href = subCard.dataset.url;
-            return;
-        }
+const subCard = e.target.closest('.subscription-card');
+if (subCard) {
+    e.preventDefault();
+    const title = subCard.dataset.title;
+    const subscriptions = JSON.parse(localStorage.getItem('subscriptions') || '[]');
+    const animeData = subscriptions.find(sub => sub.title === title);
+
+    if (animeData) {
+        currentAnimeData = animeData; // Set data global
+        const animeSlug = animeData.title.toLowerCase().replace(/[^a-z0-9]/g, '-');
+        updateURL(`/${animeSlug}-pilih-episode`); // Perbarui URL
+        app.innerHTML = templates.detailPage(animeData, animeData.title, animeData.thumbnail); // Render halaman detail
+    }
+    return;
+}
+
 
         // Handle episode cards
         const epCard = e.target.closest('.episode-card');
@@ -428,24 +467,22 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        // Handle subscribe button
-        if (e.target.closest('#subscribe-btn')) {
-            e.preventDefault();
-            const btn = e.target.closest('#subscribe-btn');
-            const title = btn.dataset.title;
-            const thumbnail = btn.dataset.thumbnail;
-            const url = btn.dataset.url;
-            
-            const isNowSubscribed = toggleSubscription(title, thumbnail, url);
-            
-            btn.classList.add('animating');
-            setTimeout(() => {
-                btn.classList.toggle('subscribed', isNowSubscribed);
-                btn.querySelector('.btn-text').textContent = isNowSubscribed ? 'Tersubscribe' : 'Subscribe';
-                btn.querySelector('.btn-icon').textContent = isNowSubscribed ? '✓' : '+';
-                btn.classList.remove('animating');
-            }, 200);
-        }
+// Handle subscribe button
+if (e.target.closest('#subscribe-btn')) {
+    e.preventDefault();
+    const btn = e.target.closest('#subscribe-btn');
+
+    // Panggil fungsi toggleSubscription baru kita
+    const isNowSubscribed = toggleSubscription();
+
+    btn.classList.add('animating');
+    setTimeout(() => {
+        btn.classList.toggle('subscribed', isNowSubscribed);
+        btn.querySelector('.btn-text').textContent = isNowSubscribed ? 'Tersubscribe' : 'Subscribe';
+        btn.querySelector('.btn-icon').textContent = isNowSubscribed ? '✓' : '+';
+        btn.classList.remove('animating');
+    }, 200);
+}
 
         // Handle Google login
         if (e.target.closest('#google-login-btn')) {
