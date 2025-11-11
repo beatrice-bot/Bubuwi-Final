@@ -1024,3 +1024,241 @@ body {
         scroll-behavior: smooth;
     }
 }
+
+/* =================================== */
+/* ==== PERBAIKAN DESAIN FANCY v1 ==== */
+/* =================================== */
+
+/* Halaman Detail Fancy */
+.fancy-detail-header {
+    position: relative;
+    width: 100%;
+    min-height: 250px;
+    background-size: cover;
+    background-position: center 30%;
+    padding: 1rem;
+    display: flex;
+    align-items: flex-end;
+    margin-bottom: 1rem;
+}
+
+.header-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(to top, rgba(0, 0, 0, 1) 0%, rgba(0, 0, 0, 0.8) 50%, rgba(0, 0, 0, 0.2) 100%);
+    z-index: 1;
+}
+
+.header-content {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    gap: 1.5rem;
+    align-items: flex-end;
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.header-poster {
+    width: 120px;
+    height: 180px;
+    object-fit: cover;
+    border-radius: var(--border-radius);
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    box-shadow: var(--shadow-large);
+}
+
+.header-info {
+    flex: 1;
+    padding-bottom: 0.5rem;
+}
+
+.header-info h2 {
+    font-size: 1.75rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    line-height: 1.2;
+}
+
+.header-info p {
+    font-size: 1rem;
+    color: var(--text-secondary);
+    margin-bottom: 1.5rem;
+}
+
+.header-info .subscribe-btn {
+    border-radius: var(--border-radius);
+    padding: 0.75rem 1rem;
+    gap: 0.75rem;
+}
+
+.page-title-section {
+    padding: 0 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.fancy-episode-list {
+    padding: 0 1rem;
+    margin-bottom: 2rem;
+}
+
+.fancy-episode-card {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    background: var(--bg-card);
+    backdrop-filter: blur(20px);
+    padding: 1rem;
+    border-radius: var(--border-radius);
+    margin-bottom: 0.75rem;
+    text-decoration: none;
+    color: var(--text-primary);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    transition: all 0.3s ease;
+}
+
+.fancy-episode-card:hover {
+    background: rgba(255, 255, 255, 0.1);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-medium);
+}
+
+.ep-icon {
+    width: 36px;
+    height: 36px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: var(--accent-gradient);
+    color: white;
+}
+
+.ep-icon svg {
+    width: 20px;
+    height: 20px;
+    fill: currentColor;
+    margin-left: 2px; /* Center play icon */
+}
+
+.ep-title {
+    font-size: 1rem;
+    font-weight: 500;
+    margin: 0;
+    line-height: 1.4;
+}
+
+/* Hapus style lama agar tidak bentrok */
+.detail-header, .episode-list {
+    display: none;
+}
+
+/* ================================= */
+/* Halaman Nonton Fancy */
+
+.fancy-watch-container {
+    padding: 0;
+}
+
+.fancy-watch-container .video-container {
+    padding: 0; /* Hapus padding lama */
+    margin-bottom: 1rem;
+}
+
+.fancy-watch-container .video-container iframe {
+    border-radius: 0; /* Video full-width di atas */
+    box-shadow: none;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+
+.watch-info-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem;
+}
+
+.watch-info-header .back-btn {
+    flex-shrink: 0;
+}
+
+.watch-info-header .episode-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin: 0;
+    line-height: 1.3;
+}
+
+.fancy-watch-container .episode-controls {
+    padding: 0 1rem;
+    margin-bottom: 2rem;
+}
+
+.section-title-small {
+    font-family: var(--font-title);
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-bottom: 1.5rem;
+    padding: 0 1rem;
+    color: var(--text-primary);
+}
+
+.fancy-episode-grid {
+    padding: 0 1rem;
+    margin-bottom: 2rem;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+/* Sembunyikan scrollbar */
+.fancy-episode-grid::-webkit-scrollbar {
+    display: none;
+}
+.fancy-episode-grid {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+
+.fancy-episode-scroll {
+    display: flex;
+    gap: 0.75rem;
+    padding-bottom: 1rem; /* Ruang untuk shadow */
+}
+
+.fancy-episode-grid-item {
+    flex-shrink: 0; /* Mencegah item mengecil */
+    width: 60px;
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--bg-card);
+    backdrop-filter: blur(20px);
+    border-radius: var(--border-radius);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.fancy-episode-grid-item:hover {
+    background: rgba(255, 255, 255, 0.1);
+    transform: translateY(-2px);
+}
+
+.fancy-episode-grid-item.active {
+    background: var(--accent-gradient);
+    color: white;
+    border-color: var(--accent-primary);
+}
+
+/* Hapus style lama agar tidak bentrok */
+.watch-header, .episode-grid {
+    display: none;
+}
+
