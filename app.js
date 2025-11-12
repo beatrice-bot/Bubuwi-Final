@@ -1,17 +1,16 @@
-
 document.addEventListener('DOMContentLoaded', () => {
     const app = document.getElementById('app-content');
     const bottomNav = document.querySelector('.bottom-nav');
+    // Gunakan URL API Anda SENDIRI
+    const API_URL = "https://bubuwi-pro.netlify.app/api/scrape"; // Ganti dengan URL API Anda
 
-    const API_URL = "https://bubuwi-pro.netlify.app/api/scrape";
-    
     let currentUser = null;
-    let currentAnimeData = null;
+    let currentAnimeData = null; // Menyimpan data anime saat ini (termasuk daftar episode)
     let currentEpisodeIndex = 0;
     let slideIndex = 0;
     let slideInterval;
 
-    // Initialize Firebase Auth
+    // Initialize Firebase Auth (jika ada)
     if (window.firebaseAuth) {
         window.firebaseAuth.onAuthStateChanged(window.firebaseAuth.auth, (user) => {
             currentUser = user;
@@ -26,11 +25,11 @@ document.addEventListener('DOMContentLoaded', () => {
         const url = new URL(window.location);
         url.pathname = path;
         url.search = '';
-        
+
         Object.keys(params).forEach(key => {
             if (params[key]) url.searchParams.set(key, params[key]);
         });
-        
+
         window.history.pushState(null, '', url.toString());
     };
 
@@ -42,20 +41,21 @@ document.addEventListener('DOMContentLoaded', () => {
     const getCurrentPage = () => {
         const path = window.location.pathname;
         if (path === '/' || path === '/index') return 'home';
-        if (path === '/subscribe') return 'subscribe';
+        // Hapus halaman subscribe
         if (path === '/akun') return 'account';
         if (path.includes('-episode-')) return 'watch';
         if (path.includes('-pilih-episode')) return 'detail';
-        
+
         const params = getURLParams();
         if (params.s) return 'search';
-        
+
         return 'home';
     };
 
+    // Templates HTML (Memperbarui untuk detail dan watch, hapus subscribe)
     const templates = {
         loader: () => `<div class="loader"><div class="loader-spinner"></div><p>Loading...</p></div>`,
-        
+
         homePage: (data) => `
             <div class="hero-section">
                 <div class="hero-gif-container">
@@ -66,7 +66,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 </div>
                 <h1 class="hero-title">Bubuwi-V3</h1>
             </div>
-            
+
             <div class="featured-section">
                 <h2 class="section-title">Anime Pilihan</h2>
                 <div class="slider-container">
@@ -80,7 +80,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     </div>
                 </div>
             </div>
-            
+
             <div class="search-section">
                 <div class="search-container">
                     <form id="main-search-form">
@@ -91,11 +91,12 @@ document.addEventListener('DOMContentLoaded', () => {
                     </form>
                 </div>
             </div>
-            
+
             <div class="latest-section">
                 <h2 class="section-title">Anime Baru Rilis</h2>
                 <div class="anime-grid">${(data.results || []).map(templates.animeCard).join('')}</div>
-            </div>`,
+            </div>
+        `,
 
         searchPage: (query, results) => `
             <div class="search-page">
@@ -103,38 +104,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 <div class="search-results-grid">
                     ${results.map(templates.searchResultCard).join('')}
                 </div>
-            </div>`,
-            
-        slideCard: (anime, index) => `
-            <div class="slide-card ${index === 0 ? 'active' : ''}" data-link="${anime.link}" data-title="${anime.seriesTitle || anime.title}" data-thumbnail="${anime.thumbnail}">
-                <div class="slide-image">
-                    <img src="${anime.thumbnail}" alt="${anime.seriesTitle || anime.title}">
-                    ${anime.episode ? `<div class="slide-episode-badge">${anime.episode}</div>` : ''}
-                </div>
-                <div class="slide-content">
-                    <h3 class="slide-title">${anime.seriesTitle || anime.title}</h3>
-                </div>
-            </div>`,
-            
-        subscribePage: () => {
-            const subscriptions = JSON.parse(localStorage.getItem('subscriptions') || '[]');
-            return `
-                <div class="page-title">Anime Berlangganan</div>
-                <div class="subscription-grid">
-                    ${subscriptions.length > 0 ? 
-                        subscriptions.map(sub => `
-                            <div class="subscription-card" data-url="${sub.url}">
-                                <img src="${sub.thumbnail}" alt="${sub.title}">
-                                <div class="subscription-info">
-                                    <h3>${sub.title}</h3>
-                                </div>
-                            </div>
-                        `).join('') : 
-                        '<div class="empty-state"><p>Belum ada anime yang disubscribe</p></div>'
-                    }
-                </div>`;
-        },
-        
+            </div>
+        `,
+
+        // Hapus halaman subscribePage
+        // subscribePage: () => { ... },
+
         accountPage: () => `
             <div class="page-title">Akun</div>
             <div class="account-section">
@@ -176,61 +151,79 @@ document.addEventListener('DOMContentLoaded', () => {
                     <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQNxuydAoOVzXmO6EXy6vZhaJ17jCGvYKITEzu7BNMYkEaux6HqKvnQax0Q&s=10" alt="TikTok">
                     <span>@adnansagiri</span>
                 </a>
-            </div>`,
-            
+            </div>
+        `,
+
+        slideCard: (anime, index) => `
+            <div class="slide-card ${index === 0 ? 'active' : ''}" data-link="${anime.link}" data-title="${anime.seriesTitle || anime.title}" data-thumbnail="${anime.thumbnail}">
+                <div class="slide-image">
+                    <img src="${anime.thumbnail}" alt="${anime.seriesTitle || anime.title}">
+                    ${anime.episode ? `<div class="slide-episode-badge">${anime.episode}</div>` : ''}
+                </div>
+                <div class="slide-content">
+                    <h3 class="slide-title">${anime.seriesTitle || anime.title}</h3>
+                </div>
+            </div>
+        `,
+
         animeCard: (anime) => `
             <a href="#" class="anime-card" data-link="${anime.link}" data-title="${anime.seriesTitle || anime.title}" data-thumbnail="${anime.thumbnail}">
                 ${anime.episode ? `<div class="episode-badge">${anime.episode}</div>` : ''}
                 <img src="${anime.thumbnail}" alt="${anime.seriesTitle || anime.title}">
                 <div class="title">${anime.seriesTitle || anime.title}</div>
-            </a>`,
-            
+            </a>
+        `,
+
         searchResultCard: (anime) => `
             <a href="#" class="search-result-card" data-link="${anime.link}" data-title="${anime.title}" data-thumbnail="${anime.thumbnail}">
                 <img src="${anime.thumbnail || 'https://via.placeholder.com/200x300'}" alt="${anime.title}">
                 <div class="search-result-info">
                     <h3>${anime.title}</h3>
                 </div>
-            </a>`,
-            
+            </a>
+        `,
+
+        // Detail Page - Kembali ke scraping sederhana
         detailPage: (data, title, thumbnail) => {
-            const isSubscribed = isAnimeSubscribed(title);
-            const animeSlug = title.toLowerCase().replace(/[^a-z0-9]/g, '-');
+            // Gunakan data yang disimpan sebelumnya (currentAnimeData) jika tersedia
+            const episodes = currentAnimeData?.episodes || data.episodes || [];
+            const episodeCount = currentAnimeData?.episodeCount || data.episodeCount || episodes.length;
+
             return `
                 <div class="detail-header">
                     <img src="${thumbnail}" alt="${title}">
                     <div class="detail-info">
                         <h2>${title}</h2>
-                        <p>Total Episode: ${data.episodeCount || '?'}</p>
-                        <button id="subscribe-btn" class="subscribe-btn ${isSubscribed ? 'subscribed' : ''}" 
-                                data-title="${title}" data-thumbnail="${thumbnail}" data-url="/${animeSlug}-pilih-episode">
-                            <span class="btn-text">${isSubscribed ? 'Tersubscribe' : 'Subscribe'}</span>
-                            <span class="btn-icon">${isSubscribed ? '✓' : '+'}</span>
-                        </button>
+                        <p>Total Episode: ${episodeCount}</p>
+                        <!-- Hapus tombol subscribe -->
                     </div>
                 </div>
                 <div class="episode-list">
-                    ${(data.episodes || []).map((ep, index) => `
+                    <h3 class="section-title">Daftar Episode</h3>
+                    ${episodes.map((ep, index) => `
                         <a href="#" class="episode-card" data-link="${ep.link}" data-episode-index="${index}">
                             <h3>${ep.title}</h3>
                         </a>
                     `).join('')}
-                </div>`;
+                </div>
+            `;
         },
-        
+
+        // Watch Page - Kembali ke scraping sederhana
         watchPage: (data, episodeIndex = 0) => {
             const episodes = currentAnimeData?.episodes || [];
             const currentEp = episodes[episodeIndex];
             const hasPrev = episodeIndex > 0;
             const hasNext = episodeIndex < episodes.length - 1;
-            
+            const animeTitle = currentAnimeData?.title || 'Anime';
+
             return `
                 <div class="watch-header">
                     <button id="back-to-detail" class="back-btn">
                         <svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
                         Kembali
                     </button>
-                    <h2 class="episode-title">${data.title}</h2>
+                    <h2 class="episode-title">${animeTitle} - Episode ${episodeIndex + 1}</h2>
                 </div>
                 <div class="video-container">
                     <iframe src="${data.videoFrames ? data.videoFrames[0] : ''}" allowfullscreen></iframe>
@@ -251,18 +244,17 @@ document.addEventListener('DOMContentLoaded', () => {
                             ${index + 1}
                         </div>
                     `).join('')}
-                </div>`;
+                </div>
+            `;
         },
-        
+
+        // Bottom Nav - Hapus tombol subscribe
         bottomNav: (activePage) => `
             <button class="nav-button ${activePage === 'home' ? 'active' : ''}" data-page="home">
                 <svg viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
                 <span>Utama</span>
             </button>
-            <button class="nav-button ${activePage === 'subscribe' ? 'active' : ''}" data-page="subscribe">
-                <svg viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
-                <span>Subscribe</span>
-            </button>
+            <!-- Hapus tombol subscribe -->
             <button class="nav-button ${activePage === 'account' ? 'active' : ''}" data-page="account">
                 <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10s10-4.48 10-10S17.52 2 12 2m0 4c1.93 0 3.5 1.57 3.5 3.5S13.93 13 12 13s-3.5-1.57-3.5-3.5S10.07 6 12 6m0 13c-2.33 0-4.31-1.46-5.11-3.5h10.22c-.8 2.04-2.78 3.5-5.11 3.5Z"/></svg>
                 <span>Akun</span>
@@ -275,7 +267,7 @@ document.addEventListener('DOMContentLoaded', () => {
             router.currentPage = page;
             app.innerHTML = templates.loader();
             bottomNav.innerHTML = templates.bottomNav(page);
-            
+
             try {
                 let content = '';
                 if (page === 'home') {
@@ -289,16 +281,32 @@ document.addEventListener('DOMContentLoaded', () => {
                     updateURL('/', { s: query });
                     const data = await fetch(`${API_URL}?search=${encodeURIComponent(query)}`).then(res => res.json());
                     content = templates.searchPage(query, data.results || []);
-                } else if (page === 'subscribe') {
-                    updateURL('/subscribe');
-                    content = templates.subscribePage();
+                // } else if (page === 'subscribe') { // Hapus bagian ini
+                //     updateURL('/subscribe');
+                //     content = templates.subscribePage();
                 } else if (page === 'account') {
                     updateURL('/akun');
                     content = templates.accountPage();
+                } else if (page === 'detail') {
+                    // Render detail page jika data sudah ada di currentAnimeData
+                    if (currentAnimeData) {
+                         content = templates.detailPage(currentAnimeData, currentAnimeData.title, currentAnimeData.thumbnail);
+                    } else {
+                         app.innerHTML = `<p class="error-message">Data anime tidak ditemukan. Silakan kembali ke halaman utama.</p>`;
+                         return;
+                    }
+                } else if (page === 'watch') {
+                    // Render watch page jika data sudah ada
+                     if (currentAnimeData) {
+                         content = templates.watchPage(currentAnimeData.episodes[currentEpisodeIndex] || {}, currentEpisodeIndex);
+                     } else {
+                          app.innerHTML = `<p class="error-message">Data episode tidak ditemukan. Silakan kembali ke daftar episode.</p>`;
+                          return;
+                     }
                 }
                 app.innerHTML = content;
-            } catch (e) { 
-                app.innerHTML = `<p class="error-message">Gagal memuat. Periksa URL API di app.js atau coba lagi. (${e.message})</p>`; 
+            } catch (e) {
+                app.innerHTML = `<p class="error-message">Gagal memuat. Periksa URL API di app.js atau coba lagi. (${e.message})</p>`;
             }
         }
     };
@@ -306,9 +314,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const initSlider = () => {
         const track = document.getElementById('slider-track');
         const dots = document.querySelectorAll('.slider-dot');
-        
+
         if (!track || !dots.length) return;
-        
+
         const updateSlider = (index) => {
             slideIndex = index;
             track.style.transform = `translateX(-${index * 100}%)`;
@@ -316,11 +324,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 dot.classList.toggle('active', i === index);
             });
         };
-        
+
         dots.forEach((dot, index) => {
             dot.addEventListener('click', () => updateSlider(index));
         });
-        
+
         slideInterval = setInterval(() => {
             slideIndex = (slideIndex + 1) % dots.length;
             updateSlider(slideIndex);
@@ -349,44 +357,27 @@ document.addEventListener('DOMContentLoaded', () => {
             const finalThumbnail = thumbnail !== 'null' && thumbnail ? thumbnail : data.thumbnail;
             app.innerHTML = templates.detailPage(data, title, finalThumbnail);
         } catch (e) {
-            app.innerHTML = '<p class="error-message">Gagal memuat detail anime.</p>';
+            app.innerHTML = `<p class="error-message">Gagal memuat detail anime. (${e.message})</p>`;
         }
     };
 
     const handleWatch = async (link, episodeIndex = 0) => {
         app.innerHTML = templates.loader();
         currentEpisodeIndex = episodeIndex;
-        
+
         const animeTitle = currentAnimeData?.title || 'anime';
         const animeSlug = animeTitle.toLowerCase().replace(/[^a-z0-9]/g, '-');
         updateURL(`/${animeSlug}-episode-${episodeIndex + 1}`);
-        
+
         try {
             const data = await fetch(`${API_URL}?url=${encodeURIComponent(link)}`).then(res => res.json());
             app.innerHTML = templates.watchPage(data, episodeIndex);
         } catch (e) {
-            app.innerHTML = '<p class="error-message">Gagal memuat video.</p>';
+            app.innerHTML = `<p class="error-message">Gagal memuat video. (${e.message})</p>`;
         }
     };
 
-    const isAnimeSubscribed = (title) => {
-        const subscriptions = JSON.parse(localStorage.getItem('subscriptions') || '[]');
-        return subscriptions.some(sub => sub.title === title);
-    };
-
-    const toggleSubscription = (title, thumbnail, url) => {
-        let subscriptions = JSON.parse(localStorage.getItem('subscriptions') || '[]');
-        const existingIndex = subscriptions.findIndex(sub => sub.title === title);
-        
-        if (existingIndex > -1) {
-            subscriptions.splice(existingIndex, 1);
-        } else {
-            subscriptions.push({ title, thumbnail, url });
-        }
-        
-        localStorage.setItem('subscriptions', JSON.stringify(subscriptions));
-        return existingIndex === -1;
-    };
+    // Hapus fungsi toggleSubscription dan isAnimeSubscribed
 
     // Event Listeners
     app.addEventListener('submit', e => {
@@ -411,41 +402,21 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        // Handle subscription cards
-        const subCard = e.target.closest('.subscription-card');
-        if (subCard) {
-            e.preventDefault();
-            window.location.href = subCard.dataset.url;
-            return;
-        }
+        // Hapus event listener untuk subscription card
+        // const subCard = e.target.closest('.subscription-card');
+        // if (subCard) { ... }
 
         // Handle episode cards
         const epCard = e.target.closest('.episode-card');
-        if (epCard) { 
-            e.preventDefault(); 
+        if (epCard) {
+            e.preventDefault();
             const episodeIndex = parseInt(epCard.dataset.episodeIndex) || 0;
             handleWatch(epCard.dataset.link, episodeIndex);
             return;
         }
 
-        // Handle subscribe button
-        if (e.target.closest('#subscribe-btn')) {
-            e.preventDefault();
-            const btn = e.target.closest('#subscribe-btn');
-            const title = btn.dataset.title;
-            const thumbnail = btn.dataset.thumbnail;
-            const url = btn.dataset.url;
-            
-            const isNowSubscribed = toggleSubscription(title, thumbnail, url);
-            
-            btn.classList.add('animating');
-            setTimeout(() => {
-                btn.classList.toggle('subscribed', isNowSubscribed);
-                btn.querySelector('.btn-text').textContent = isNowSubscribed ? 'Tersubscribe' : 'Subscribe';
-                btn.querySelector('.btn-icon').textContent = isNowSubscribed ? '✓' : '+';
-                btn.classList.remove('animating');
-            }, 200);
-        }
+        // Hapus event listener untuk subscribe button
+        // if (e.target.closest('#subscribe-btn')) { ... }
 
         // Handle Google login
         if (e.target.closest('#google-login-btn')) {
@@ -474,7 +445,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
 
-        // Handle episode navigation - FIXED
+        // Handle episode navigation
         if (e.target.closest('#prev-episode') && !e.target.closest('#prev-episode').disabled) {
             e.preventDefault();
             if (currentEpisodeIndex > 0 && currentAnimeData?.episodes) {
@@ -489,7 +460,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
 
-        // Handle episode grid - FIXED
+        // Handle episode grid
         const gridItem = e.target.closest('.episode-grid-item');
         if (gridItem) {
             e.preventDefault();
@@ -504,7 +475,13 @@ document.addEventListener('DOMContentLoaded', () => {
         const navButton = e.target.closest('.nav-button');
         if (navButton) {
             clearInterval(slideInterval);
-            router.render(navButton.dataset.page);
+            // Hapus pengecekan untuk halaman 'subscribe'
+            if (navButton.dataset.page === 'home' || navButton.dataset.page === 'account') {
+                 router.render(navButton.dataset.page);
+            } else if (navButton.dataset.page === 'subscribe') {
+                 // Arahkan ke halaman utama jika subscribe diklik
+                 router.render('home');
+            }
         }
     });
 
@@ -512,21 +489,32 @@ document.addEventListener('DOMContentLoaded', () => {
     window.addEventListener('popstate', () => {
         const page = getCurrentPage();
         const params = getURLParams();
-        
+
         if (page === 'search' && params.s) {
             router.render('search', { query: params.s });
         } else {
-            router.render(page);
+            // Hapus pengecekan untuk halaman 'subscribe'
+            if (page === 'home' || page === 'account' || page === 'detail' || page === 'watch') {
+                 router.render(page);
+            } else {
+                 // Arahkan ke halaman utama jika halaman tidak dikenal (termasuk /subscribe)
+                 router.render('home');
+            }
         }
     });
 
     // Initialize router
     const initialPage = getCurrentPage();
     const initialParams = getURLParams();
-    
+
     if (initialPage === 'search' && initialParams.s) {
         router.render('search', { query: initialParams.s });
     } else {
-        router.render(initialPage);
+        // Hapus pengecekan untuk halaman 'subscribe'
+        if (initialPage === 'home' || initialPage === 'account') {
+             router.render(initialPage);
+        } else {
+             router.render('home'); // Fallback ke home
+        }
     }
 });
