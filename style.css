@@ -1,11 +1,11 @@
-
 :root {
     --bg-primary: #000000;
     --bg-secondary: #0a0a0a;
     --bg-card: rgba(255, 255, 255, 0.05);
+    --bg-card-alt: rgba(255, 255, 255, 0.08); /* Warna alternatif untuk hover */
     --text-primary: #ffffff;
-    --text-secondary: #a0a0a0;
-    --text-muted: #666666;
+    --text-secondary: #d1d1d1; /* Lebih terang dari sebelumnya */
+    --text-muted: #a0a0a0;
     --accent-primary: #007AFF;
     --accent-secondary: #5856D6;
     --accent-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -15,11 +15,20 @@
     --error-color: #FF3B30;
     --border-radius: 16px;
     --border-radius-large: 24px;
+    --border-radius-xl: 32px; /* Tambahkan radius lebih besar */
     --shadow-small: 0 4px 16px rgba(0, 0, 0, 0.1);
     --shadow-medium: 0 8px 32px rgba(0, 0, 0, 0.2);
     --shadow-large: 0 16px 64px rgba(0, 0, 0, 0.3);
-    --font-title: 'Space Grotesk', 'Orbitron', sans-serif;
-    --font-body: 'Poppins', system-ui, sans-serif;
+    --shadow-xl: 0 32px 128px rgba(0, 0, 0, 0.4); /* Tambahkan shadow lebih besar */
+    --font-title: 'Space Grotesk', 'Orbitron', 'Inter', sans-serif; /* Tambahkan font alternatif */
+    --font-body: 'Poppins', 'Inter', system-ui, sans-serif;
+    --transition-fast: 0.2s ease;
+    --transition-normal: 0.3s ease;
+    --transition-slow: 0.5s ease;
+    --space-sm: 0.5rem;
+    --space-md: 1rem;
+    --space-lg: 1.5rem;
+    --space-xl: 2rem;
 }
 
 * {
@@ -34,7 +43,13 @@ body {
     color: var(--text-primary);
     line-height: 1.6;
     overflow-x: hidden;
-    padding-bottom: 80px;
+    padding-bottom: 80px; /* Ruang untuk bottom nav */
+    min-height: 100vh; /* Pastikan body setidaknya sepanjang viewport */
+    background-image:
+        radial-gradient(ellipse at center, rgba(20, 20, 40, 0.8) 0%, transparent 70%),
+        url('https://www.transparenttextures.com/patterns/dark-geometric.png');
+    background-attachment: fixed;
+    position: relative;
 }
 
 /* Background Effects */
@@ -87,6 +102,25 @@ body {
     justify-content: center;
     padding: 3rem 1rem;
     text-align: center;
+    /* Animasi shimmer */
+    background: var(--bg-primary);
+    position: relative;
+    overflow: hidden;
+}
+
+.loader::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+    animation: shimmer 2s infinite;
+}
+
+@keyframes shimmer {
+    100% { left: 100%; }
 }
 
 .loader-spinner {
@@ -97,11 +131,19 @@ body {
     border-radius: 50%;
     animation: spin 1s linear infinite;
     margin-bottom: 1rem;
+    position: relative; /* Untuk z-index shimmer */
+    z-index: 2;
 }
 
 @keyframes spin {
     0% { transform: rotate(0deg); }
     100% { transform: rotate(360deg); }
+}
+
+.loader p {
+    position: relative; /* Untuk z-index shimmer */
+    z-index: 2;
+    color: var(--text-secondary);
 }
 
 /* Hero Section - Full GIF Background */
@@ -112,6 +154,7 @@ body {
     padding: 2rem 1rem;
     margin-bottom: 2rem;
     position: relative;
+    overflow: hidden; /* Untuk efek shimmer */
 }
 
 .hero-gif-container {
@@ -124,12 +167,23 @@ body {
     border: 3px solid;
     border-image: var(--galaxy-gradient) 1;
     box-shadow: var(--shadow-large);
+    transition: var(--transition-normal);
+}
+
+.hero-gif-container:hover {
+    transform: scale(1.02);
+    box-shadow: var(--shadow-xl);
 }
 
 .hero-gif {
     width: 100%;
     height: 100%;
     object-fit: cover;
+    transition: var(--transition-normal);
+}
+
+.hero-gif-container:hover .hero-gif {
+    transform: scale(1.05);
 }
 
 .logo-overlay {
@@ -147,6 +201,13 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
+    animation: pulse 4s infinite;
+}
+
+@keyframes pulse {
+    0% { box-shadow: 0 0 0 0 rgba(102, 126, 234, 0.7); }
+    70% { box-shadow: 0 0 0 20px rgba(102, 126, 234, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(102, 126, 234, 0); }
 }
 
 .hero-logo {
@@ -166,7 +227,88 @@ body {
     background-clip: text;
     text-align: center;
     letter-spacing: 2px;
+    position: relative;
+    /* Efek glitch */
+    text-transform: uppercase;
 }
+
+.hero-title::before,
+.hero-title::after {
+    content: attr(data-text);
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: var(--galaxy-gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    opacity: 0.8;
+}
+
+.hero-title::before {
+    left: 2px;
+    text-shadow: -2px 0 red;
+    clip: rect(44px, 450px, 56px, 0);
+    animation: glitch-anim 5s infinite linear alternate-reverse;
+}
+
+.hero-title::after {
+    left: -2px;
+    text-shadow: -2px 0 blue;
+    clip: rect(44px, 450px, 56px, 0);
+    animation: glitch-anim2 5s infinite linear alternate-reverse;
+}
+
+@keyframes glitch-anim {
+    0% { clip: rect(42px, 9999px, 44px, 0); }
+    5% { clip: rect(12px, 9999px, 59px, 0); }
+    10% { clip: rect(48px, 9999px, 29px, 0); }
+    15% { clip: rect(42px, 9999px, 73px, 0); }
+    20% { clip: rect(63px, 9999px, 27px, 0); }
+    25% { clip: rect(34px, 9999px, 55px, 0); }
+    30% { clip: rect(86px, 9999px, 73px, 0); }
+    35% { clip: rect(20px, 9999px, 20px, 0); }
+    40% { clip: rect(26px, 9999px, 60px, 0); }
+    45% { clip: rect(25px, 9999px, 66px, 0); }
+    50% { clip: rect(57px, 9999px, 98px, 0); }
+    55% { clip: rect(5px, 9999px, 46px, 0); }
+    60% { clip: rect(82px, 9999px, 31px, 0); }
+    65% { clip: rect(54px, 9999px, 27px, 0); }
+    70% { clip: rect(28px, 9999px, 99px, 0); }
+    75% { clip: rect(45px, 9999px, 69px, 0); }
+    80% { clip: rect(23px, 9999px, 85px, 0); }
+    85% { clip: rect(1px, 9999px, 83px, 0); }
+    90% { clip: rect(71px, 9999px, 20px, 0); }
+    95% { clip: rect(60px, 9999px, 36px, 0); }
+    100% { clip: rect(88px, 9999px, 57px, 0); }
+}
+
+@keyframes glitch-anim2 {
+    0% { clip: rect(65px, 9999px, 100px, 0); }
+    5% { clip: rect(52px, 9999px, 74px, 0); }
+    10% { clip: rect(79px, 9999px, 85px, 0); }
+    15% { clip: rect(75px, 9999px, 5px, 0); }
+    20% { clip: rect(67px, 9999px, 61px, 0); }
+    25% { clip: rect(14px, 9999px, 79px, 0); }
+    30% { clip: rect(1px, 9999px, 66px, 0); }
+    35% { clip: rect(86px, 9999px, 30px, 0); }
+    40% { clip: rect(23px, 9999px, 98px, 0); }
+    45% { clip: rect(85px, 9999px, 72px, 0); }
+    50% { clip: rect(71px, 9999px, 75px, 0); }
+    55% { clip: rect(2px, 9999px, 48px, 0); }
+    60% { clip: rect(30px, 9999px, 16px, 0); }
+    65% { clip: rect(59px, 9999px, 50px, 0); }
+    70% { clip: rect(41px, 9999px, 62px, 0); }
+    75% { clip: rect(2px, 9999px, 82px, 0); }
+    80% { clip: rect(47px, 9999px, 73px, 0); }
+    85% { clip: rect(3px, 9999px, 27px, 0); }
+    90% { clip: rect(26px, 9999px, 55px, 0); }
+    95% { clip: rect(42px, 9999px, 97px, 0); }
+    100% { clip: rect(38px, 9999px, 49px, 0); }
+}
+
 
 /* Featured Slider - Moved above search */
 .featured-section {
@@ -184,6 +326,17 @@ body {
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
+    position: relative;
+}
+
+.section-title::after {
+    content: '';
+    display: block;
+    width: 100px;
+    height: 4px;
+    background: var(--accent-gradient);
+    margin: 0.5rem auto 0;
+    border-radius: 2px;
 }
 
 .slider-container {
@@ -198,11 +351,33 @@ body {
     border: 2px solid;
     border-image: var(--galaxy-gradient) 1;
     box-shadow: var(--shadow-large);
+    position: relative; /* Untuk efek shimmer */
+}
+
+.slider-wrapper::before {
+    content: '';
+    position: absolute;
+    top: -2px;
+    left: -2px;
+    right: -2px;
+    bottom: -2px;
+    background: var(--galaxy-gradient);
+    z-index: -1;
+    border-radius: calc(var(--border-radius-large) + 2px);
+    opacity: 0.5;
+    filter: blur(10px);
+    animation: borderMove 4s linear infinite;
+}
+
+@keyframes borderMove {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
 }
 
 .slider-track {
     display: flex;
-    transition: transform 0.5s ease;
+    transition: transform var(--transition-slow) cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 
 .slide-card {
@@ -211,6 +386,24 @@ body {
     cursor: pointer;
     background: var(--bg-card);
     backdrop-filter: blur(20px);
+    transition: var(--transition-normal);
+    overflow: hidden; /* Untuk efek shimmer */
+}
+
+.slide-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+    transition: left 0.5s;
+    z-index: 1;
+}
+
+.slide-card:hover::before {
+    left: 100%;
 }
 
 .slide-image {
@@ -225,8 +418,9 @@ body {
     width: 100%;
     height: 100%;
     object-fit: cover;
-    transition: transform 0.3s ease;
+    transition: transform var(--transition-slow) ease;
     border-radius: var(--border-radius-large);
+    display: block;
 }
 
 .slide-card:hover img {
@@ -244,6 +438,13 @@ body {
     font-size: 0.875rem;
     font-weight: 600;
     box-shadow: var(--shadow-small);
+    z-index: 2;
+    animation: badgePop var(--transition-fast) ease-out;
+}
+
+@keyframes badgePop {
+    from { transform: scale(0); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
 }
 
 .slide-content {
@@ -261,6 +462,7 @@ body {
     font-weight: 600;
     color: white;
     margin: 0;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
 }
 
 .slider-dots {
@@ -276,11 +478,29 @@ body {
     border-radius: 50%;
     background: rgba(255, 255, 255, 0.3);
     cursor: pointer;
-    transition: all 0.3s ease;
+    transition: all var(--transition-fast) ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.slider-dot::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 0;
+    height: 100%;
+    background: var(--accent-primary);
+    transition: width var(--transition-slow) ease;
+}
+
+.slider-dot.active::after {
+    width: 100%;
 }
 
 .slider-dot.active {
-    background: var(--accent-primary);
+    background: transparent;
+    border: 1px solid var(--accent-primary);
     transform: scale(1.2);
 }
 
@@ -300,6 +520,18 @@ body {
     position: relative;
     display: flex;
     align-items: center;
+    background: var(--bg-card);
+    border-radius: var(--border-radius-large);
+    padding: 0.25rem;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: var(--shadow-medium);
+    transition: var(--transition-normal);
+    backdrop-filter: blur(10px);
+}
+
+#main-search-form:focus-within {
+    border-color: var(--accent-primary);
+    box-shadow: var(--shadow-large);
 }
 
 #main-search-input {
@@ -307,18 +539,16 @@ body {
     padding: 1rem 1.5rem;
     padding-right: 4rem;
     font-size: 1rem;
-    border: 2px solid rgba(255, 255, 255, 0.1);
+    border: none;
     border-radius: var(--border-radius-large);
-    background: rgba(255, 255, 255, 0.05);
-    backdrop-filter: blur(20px);
+    background: transparent;
     color: var(--text-primary);
-    transition: all 0.3s ease;
+    transition: all var(--transition-fast) ease;
 }
 
 #main-search-input:focus {
     outline: none;
-    border-color: var(--accent-primary);
-    box-shadow: 0 0 0 4px rgba(0, 122, 255, 0.1);
+    color: var(--text-primary);
 }
 
 .search-btn {
@@ -336,11 +566,13 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: all 0.3s ease;
+    transition: all var(--transition-fast) ease;
+    box-shadow: var(--shadow-small);
 }
 
 .search-btn:hover {
     transform: translateY(-50%) scale(1.1);
+    box-shadow: var(--shadow-medium);
 }
 
 .search-btn svg {
@@ -369,14 +601,18 @@ body {
     overflow: hidden;
     text-decoration: none;
     color: var(--text-primary);
-    transition: all 0.3s ease;
+    transition: all var(--transition-normal) ease;
     border: 1px solid rgba(255, 255, 255, 0.1);
     position: relative;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
 }
 
 .search-result-card:hover {
     transform: translateY(-4px);
     box-shadow: var(--shadow-medium);
+    border-color: var(--accent-primary);
 }
 
 .search-result-card img {
@@ -384,10 +620,19 @@ body {
     aspect-ratio: 2 / 3;
     object-fit: cover;
     border-radius: var(--border-radius) var(--border-radius) 0 0;
+    transition: var(--transition-normal);
+}
+
+.search-result-card:hover img {
+    transform: scale(1.05);
 }
 
 .search-result-info {
     padding: 1rem;
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
 }
 
 .search-result-info h3 {
@@ -417,15 +662,19 @@ body {
     overflow: hidden;
     text-decoration: none;
     color: var(--text-primary);
-    transition: all 0.3s ease;
+    transition: all var(--transition-normal) ease;
     background: var(--bg-card);
     backdrop-filter: blur(20px);
     border: 1px solid rgba(255, 255, 255, 0.1);
+    display: flex;
+    flex-direction: column;
+    height: 100%;
 }
 
 .anime-card:hover {
     transform: translateY(-8px);
     box-shadow: var(--shadow-large);
+    border-color: var(--accent-primary);
 }
 
 .anime-card img {
@@ -434,6 +683,11 @@ body {
     object-fit: cover;
     display: block;
     border-radius: var(--border-radius) var(--border-radius) 0 0;
+    transition: var(--transition-normal);
+}
+
+.anime-card:hover img {
+    transform: scale(1.05);
 }
 
 .anime-card .title {
@@ -447,6 +701,7 @@ body {
     font-weight: 600;
     line-height: 1.3;
     border-radius: 0 0 var(--border-radius) var(--border-radius);
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
 }
 
 .episode-badge {
@@ -461,65 +716,13 @@ body {
     font-weight: 600;
     box-shadow: var(--shadow-small);
     z-index: 2;
+    animation: badgePop var(--transition-fast) ease-out;
 }
 
-/* Subscribe Page - Fixed Grid Layout */
-.subscription-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-    gap: 1rem;
-    padding: 0 1rem;
-    max-width: 1200px;
-    margin: 0 auto;
-}
+/* Subscribe Page - Removed */
+/* The subscribe page and related styles are removed. */
+/* Subscription grid styles are also removed. */
 
-.subscription-card {
-    background: var(--bg-card);
-    backdrop-filter: blur(20px);
-    border-radius: var(--border-radius);
-    overflow: hidden;
-    text-decoration: none;
-    color: var(--text-primary);
-    transition: all 0.3s ease;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    cursor: pointer;
-    position: relative;
-}
-
-.subscription-card:hover {
-    transform: translateY(-4px);
-    box-shadow: var(--shadow-medium);
-}
-
-.subscription-card img {
-    width: 100%;
-    aspect-ratio: 2 / 3;
-    object-fit: cover;
-    border-radius: var(--border-radius) var(--border-radius) 0 0;
-}
-
-.subscription-info {
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    background: linear-gradient(to top, rgba(0, 0, 0, 0.9), transparent);
-    padding: 2rem 0.75rem 0.75rem;
-}
-
-.subscription-info h3 {
-    font-size: 0.875rem;
-    font-weight: 600;
-    margin: 0;
-    line-height: 1.3;
-}
-
-.empty-state {
-    text-align: center;
-    padding: 3rem 1rem;
-    color: var(--text-secondary);
-    grid-column: 1 / -1;
-}
 
 /* Account Page */
 .account-section {
@@ -546,6 +749,7 @@ body {
     padding: 2px;
     margin: 0 auto 1rem auto;
     display: block;
+    box-shadow: var(--shadow-small);
 }
 
 .profile-picture img {
@@ -582,7 +786,7 @@ body {
     font-size: 1rem;
     font-weight: 600;
     cursor: pointer;
-    transition: all 0.3s ease;
+    transition: all var(--transition-normal) ease;
     box-shadow: var(--shadow-medium);
 }
 
@@ -602,7 +806,7 @@ body {
     border-radius: var(--border-radius);
     font-weight: 600;
     cursor: pointer;
-    transition: all 0.3s ease;
+    transition: all var(--transition-normal) ease;
 }
 
 .logout-btn {
@@ -647,6 +851,7 @@ body {
 .contact-link {
     display: flex;
     align-items: center;
+    justify-content: center;
     gap: 1rem;
     padding: 1rem 1.5rem;
     border-radius: var(--border-radius);
@@ -656,12 +861,13 @@ body {
     backdrop-filter: blur(20px);
     margin-bottom: 1rem;
     border: 1px solid rgba(255, 255, 255, 0.1);
-    transition: all 0.3s ease;
+    transition: all var(--transition-normal) ease;
 }
 
 .contact-link:hover {
-    background: rgba(255, 255, 255, 0.1);
+    background: var(--bg-card-alt);
     transform: translateY(-2px);
+    border-color: var(--accent-primary);
 }
 
 .contact-link img {
@@ -676,12 +882,18 @@ body {
     gap: 1.5rem;
     padding: 1rem;
     margin-bottom: 2rem;
+    background: var(--bg-card);
+    backdrop-filter: blur(20px);
+    border-radius: var(--border-radius-large);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: var(--shadow-medium);
 }
 
 .detail-header img {
     width: 120px;
     border-radius: var(--border-radius);
     border: 2px solid rgba(255, 255, 255, 0.1);
+    object-fit: cover;
 }
 
 .detail-info {
@@ -696,41 +908,17 @@ body {
 
 .detail-info p {
     color: var(--text-secondary);
-    margin-bottom: 1.5rem;
+    margin-bottom: 1rem; /* Kurangi jarak */
 }
 
-.subscribe-btn {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.5rem;
-    padding: 0.75rem 1.5rem;
-    border: none;
-    border-radius: var(--border-radius-large);
-    background: var(--accent-gradient);
-    color: white;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    position: relative;
-    overflow: hidden;
-}
-
-.subscribe-btn:hover {
-    transform: translateY(-2px);
-    box-shadow: var(--shadow-medium);
-}
-
-.subscribe-btn.subscribed {
-    background: var(--success-color);
-}
-
-.subscribe-btn.animating {
-    transform: scale(0.95);
-}
-
+/* Hapus tombol subscribe dari detail page */
 .episode-list {
     padding: 0 1rem;
+}
+
+.episode-list h3.section-title {
+    margin-top: 1rem;
+    margin-bottom: 1rem;
 }
 
 .episode-card {
@@ -743,12 +931,14 @@ body {
     color: var(--text-primary);
     display: block;
     border: 1px solid rgba(255, 255, 255, 0.1);
-    transition: all 0.3s ease;
+    transition: all var(--transition-normal) ease;
 }
 
 .episode-card:hover {
-    background: rgba(255, 255, 255, 0.1);
+    background: var(--bg-card-alt);
     transform: translateY(-2px);
+    border-color: var(--accent-primary);
+    box-shadow: var(--shadow-small);
 }
 
 .episode-card h3 {
@@ -764,6 +954,11 @@ body {
     gap: 1rem;
     padding: 1rem;
     margin-bottom: 1rem;
+    background: var(--bg-card);
+    backdrop-filter: blur(20px);
+    border-radius: var(--border-radius-large);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: var(--shadow-medium);
 }
 
 .back-btn {
@@ -777,12 +972,12 @@ body {
     backdrop-filter: blur(20px);
     color: var(--text-primary);
     cursor: pointer;
-    transition: all 0.3s ease;
+    transition: all var(--transition-fast) ease;
     border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .back-btn:hover {
-    background: rgba(255, 255, 255, 0.1);
+    background: var(--bg-card-alt);
 }
 
 .back-btn svg {
@@ -809,6 +1004,7 @@ body {
     border: none;
     border-radius: var(--border-radius);
     box-shadow: var(--shadow-large);
+    background: black; /* Placeholder saat loading */
 }
 
 /* Fixed Episode Controls - Side by Side */
@@ -819,7 +1015,7 @@ body {
     gap: 1rem;
     padding: 0 1rem;
     margin-bottom: 2rem;
-    max-width: 400px;
+    max-width: 500px; /* Lebih lebar */
     margin-left: auto;
     margin-right: auto;
 }
@@ -835,9 +1031,10 @@ body {
     color: white;
     font-weight: 600;
     cursor: pointer;
-    transition: all 0.3s ease;
+    transition: all var(--transition-fast) ease;
     flex: 1;
     justify-content: center;
+    box-shadow: var(--shadow-small);
 }
 
 .episode-nav-btn:hover:not(.disabled) {
@@ -876,20 +1073,22 @@ body {
     border: 1px solid rgba(255, 255, 255, 0.1);
     font-weight: 600;
     cursor: pointer;
-    transition: all 0.3s ease;
+    transition: all var(--transition-fast) ease;
 }
 
 .episode-grid-item:hover {
-    background: rgba(255, 255, 255, 0.1);
+    background: var(--bg-card-alt);
     transform: translateY(-2px);
+    border-color: var(--accent-primary);
 }
 
 .episode-grid-item.active {
     background: var(--accent-primary);
     color: white;
+    box-shadow: 0 0 15px rgba(0, 122, 255, 0.5);
 }
 
-/* Bottom Navigation */
+/* Bottom Navigation - Removed Subscribe Button */
 .bottom-nav {
     position: fixed;
     bottom: 0;
@@ -914,11 +1113,36 @@ body {
     align-items: center;
     gap: 0.25rem;
     cursor: pointer;
-    transition: all 0.3s ease;
+    transition: all var(--transition-fast) ease;
+    border-radius: var(--border-radius);
+    position: relative;
+    overflow: hidden;
+}
+
+.nav-button::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%) scaleX(0);
+    width: 60%;
+    height: 3px;
+    background: var(--accent-gradient);
+    transition: var(--transition-fast);
+    border-radius: 2px;
+}
+
+.nav-button:hover {
+    color: var(--text-primary);
+    background: rgba(255, 255, 255, 0.05);
 }
 
 .nav-button.active {
     color: var(--accent-primary);
+}
+
+.nav-button.active::after {
+    transform: translateX(-50%) scaleX(1);
 }
 
 .nav-button svg {
@@ -944,6 +1168,17 @@ body {
     -webkit-text-fill-color: transparent;
     background-clip: text;
     padding: 0 1rem;
+    position: relative;
+}
+
+.page-title::after {
+    content: '';
+    display: block;
+    width: 100px;
+    height: 4px;
+    background: var(--accent-gradient);
+    margin: 0.5rem auto 0;
+    border-radius: 2px;
 }
 
 .error-message {
@@ -961,60 +1196,57 @@ body {
     .hero-title {
         font-size: 2rem;
     }
-    
     .detail-header {
         flex-direction: column;
         text-align: center;
+        align-items: center;
     }
-    
     .detail-header img {
         width: 150px;
-        margin: 0 auto;
+        margin: 0 auto 1rem auto;
     }
-    
+    .detail-info {
+        text-align: center;
+    }
     .anime-grid {
         grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
         gap: 0.75rem;
     }
-    
-    .subscription-grid {
-        grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-        gap: 0.75rem;
-    }
-    
     .episode-controls {
         flex-direction: row;
         justify-content: space-between;
         max-width: 100%;
     }
-    
     .episode-nav-btn {
         width: auto;
         flex: 1;
     }
+    .slider-wrapper {
+        margin: 0 -1rem;
+        border-radius: 0;
+    }
+    .featured-section, .latest-section, .search-section {
+        padding-left: 0;
+        padding-right: 0;
+    }
 }
-
 @media (max-width: 480px) {
     .hero-gif-container {
         width: 250px;
         height: 150px;
     }
-    
     .hero-title {
         font-size: 1.75rem;
     }
-    
-    .slider-wrapper {
-        margin: 0 -1rem;
-        border-radius: 0;
-    }
-    
     .anime-grid {
         grid-template-columns: repeat(3, 1fr);
     }
-    
-    .subscription-grid {
+    .search-results-grid {
         grid-template-columns: repeat(3, 1fr);
+    }
+    .episode-grid {
+        grid-template-columns: repeat(auto-fill, minmax(45px, 1fr));
+        gap: 0.5rem;
     }
 }
 
