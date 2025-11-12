@@ -1,92 +1,61 @@
-// --- 1. DEKLARASI VARIABEL GLOBAL ---
-let app = null;
-let bottomNav = null;
-let API_URL = "https://bubuwi-pro.netlify.app/api/scrape";
-let currentUser = null;
-let currentAnimeData = null;
-let currentEpisodeIndex = 0;
-let slideIndex = 0;
-let slideInterval = null;
 
-// Fungsi-fungsi global yang perlu diakses dari mana saja
-let updateURL = null;
-let getURLParams = null;
-let getCurrentPage = null;
-let router = null;
-
-// --- 2. INISIALISASI SAAT DOM SIAP ---
 document.addEventListener('DOMContentLoaded', () => {
-    // Inisialisasi elemen DOM
-    app = document.getElementById('app-content');
-    bottomNav = document.querySelector('.bottom-nav');
+    const app = document.getElementById('app-content');
+    const bottomNav = document.querySelector('.bottom-nav');
 
-    // Inisialisasi Firebase Auth
+    const API_URL = "https://bubuwi-pro.netlify.app/api/scrape";
+    
+    let currentUser = null;
+    let currentAnimeData = null;
+    let currentEpisodeIndex = 0;
+    let slideIndex = 0;
+    let slideInterval;
+
+    // Initialize Firebase Auth
     if (window.firebaseAuth) {
         window.firebaseAuth.onAuthStateChanged(window.firebaseAuth.auth, (user) => {
             currentUser = user;
-            if (router && router.currentPage === 'account') {
+            if (router.currentPage === 'account') {
                 router.render('account');
             }
         });
     }
 
-    // Inisialisasi fungsi-fungsi global
-    initializeGlobalFunctions();
-
-    // Inisialisasi router
-    initializeRouter();
-
-    // Inisialisasi halaman awal
-    const initialPage = getCurrentPage();
-    const initialParams = getURLParams();
-
-    if (initialPage === 'search' && initialParams.s) {
-        router.render('search', { query: initialParams.s });
-    } else {
-        router.render(initialPage);
-    }
-});
-
-// --- 3. FUNGSI-FUNGSI GLOBAL ---
-function initializeGlobalFunctions() {
-    // URL Router Functions
-    updateURL = (path, params = {}) => {
+    // URL Router
+    const updateURL = (path, params = {}) => {
         const url = new URL(window.location);
         url.pathname = path;
         url.search = '';
-
+        
         Object.keys(params).forEach(key => {
             if (params[key]) url.searchParams.set(key, params[key]);
         });
-
+        
         window.history.pushState(null, '', url.toString());
     };
 
-    getURLParams = () => {
+    const getURLParams = () => {
         const params = new URLSearchParams(window.location.search);
         return Object.fromEntries(params.entries());
     };
 
-    getCurrentPage = () => {
+    const getCurrentPage = () => {
         const path = window.location.pathname;
         if (path === '/' || path === '/index') return 'home';
         if (path === '/subscribe') return 'subscribe';
         if (path === '/akun') return 'account';
         if (path.includes('-episode-')) return 'watch';
         if (path.includes('-pilih-episode')) return 'detail';
-
+        
         const params = getURLParams();
         if (params.s) return 'search';
-
+        
         return 'home';
     };
-}
 
-// --- 4. ROUTER & TEMPLATES ---
-function initializeRouter() {
     const templates = {
         loader: () => `<div class="loader"><div class="loader-spinner"></div><p>Loading...</p></div>`,
-
+        
         homePage: (data) => `
             <div class="hero-section">
                 <div class="hero-gif-container">
@@ -97,7 +66,7 @@ function initializeRouter() {
                 </div>
                 <h1 class="hero-title">Bubuwi-V3</h1>
             </div>
-
+            
             <div class="featured-section">
                 <h2 class="section-title">Anime Pilihan</h2>
                 <div class="slider-container">
@@ -111,7 +80,7 @@ function initializeRouter() {
                     </div>
                 </div>
             </div>
-
+            
             <div class="search-section">
                 <div class="search-container">
                     <form id="main-search-form">
@@ -122,12 +91,12 @@ function initializeRouter() {
                     </form>
                 </div>
             </div>
-
+            
             <div class="latest-section">
                 <h2 class="section-title">Anime Baru Rilis</h2>
                 <div class="anime-grid">${(data.results || []).map(templates.animeCard).join('')}</div>
             </div>`,
-        
+
         searchPage: (query, results) => `
             <div class="search-page">
                 <div class="page-title">Hasil Pencarian: "${query}"</div>
@@ -135,13 +104,24 @@ function initializeRouter() {
                     ${results.map(templates.searchResultCard).join('')}
                 </div>
             </div>`,
-        
+            
+        slideCard: (anime, index) => `
+            <div class="slide-card ${index === 0 ? 'active' : ''}" data-link="${anime.link}" data-title="${anime.seriesTitle || anime.title}" data-thumbnail="${anime.thumbnail}">
+                <div class="slide-image">
+                    <img src="${anime.thumbnail}" alt="${anime.seriesTitle || anime.title}">
+                    ${anime.episode ? `<div class="slide-episode-badge">${anime.episode}</div>` : ''}
+                </div>
+                <div class="slide-content">
+                    <h3 class="slide-title">${anime.seriesTitle || anime.title}</h3>
+                </div>
+            </div>`,
+            
         subscribePage: () => {
             const subscriptions = JSON.parse(localStorage.getItem('subscriptions') || '[]');
             return `
                 <div class="page-title">Anime Berlangganan</div>
                 <div class="subscription-grid">
-                    ${subscriptions.length > 0 ?
+                    ${subscriptions.length > 0 ? 
                         subscriptions.map(sub => `
                             <div class="subscription-card" data-url="${sub.url}">
                                 <img src="${sub.thumbnail}" alt="${sub.title}">
@@ -149,7 +129,7 @@ function initializeRouter() {
                                     <h3>${sub.title}</h3>
                                 </div>
                             </div>
-                        `).join('') :
+                        `).join('') : 
                         '<div class="empty-state"><p>Belum ada anime yang disubscribe</p></div>'
                     }
                 </div>`;
@@ -197,14 +177,14 @@ function initializeRouter() {
                     <span>@adnansagiri</span>
                 </a>
             </div>`,
-        
+            
         animeCard: (anime) => `
             <a href="#" class="anime-card" data-link="${anime.link}" data-title="${anime.seriesTitle || anime.title}" data-thumbnail="${anime.thumbnail}">
                 ${anime.episode ? `<div class="episode-badge">${anime.episode}</div>` : ''}
                 <img src="${anime.thumbnail}" alt="${anime.seriesTitle || anime.title}">
                 <div class="title">${anime.seriesTitle || anime.title}</div>
             </a>`,
-        
+            
         searchResultCard: (anime) => `
             <a href="#" class="search-result-card" data-link="${anime.link}" data-title="${anime.title}" data-thumbnail="${anime.thumbnail}">
                 <img src="${anime.thumbnail || 'https://via.placeholder.com/200x300'}" alt="${anime.title}">
@@ -212,7 +192,7 @@ function initializeRouter() {
                     <h3>${anime.title}</h3>
                 </div>
             </a>`,
-        
+            
         detailPage: (data, title, thumbnail) => {
             const isSubscribed = isAnimeSubscribed(title);
             const animeSlug = title.toLowerCase().replace(/[^a-z0-9]/g, '-');
@@ -289,8 +269,7 @@ function initializeRouter() {
             </button>`
     };
 
-    // Inisialisasi router object
-    router = {
+    const router = {
         currentPage: getCurrentPage(),
         render: async (page, params = {}) => {
             router.currentPage = page;
@@ -316,37 +295,20 @@ function initializeRouter() {
                 } else if (page === 'account') {
                     updateURL('/akun');
                     content = templates.accountPage();
-                } else if (page === 'detail') {
-                    // Render detail page jika data sudah ada di currentAnimeData
-                    if (currentAnimeData) {
-                         content = templates.detailPage(currentAnimeData, currentAnimeData.title, currentAnimeData.thumbnail);
-                    } else {
-                         app.innerHTML = `<p class="error-message">Data anime tidak ditemukan. Silakan kembali ke halaman utama.</p>`;
-                         return;
-                    }
-                } else if (page === 'watch') {
-                    // Render watch page jika data sudah ada
-                     if (currentAnimeData) {
-                         content = templates.watchPage(currentAnimeData.episodes[currentEpisodeIndex] || {}, currentEpisodeIndex);
-                     } else {
-                          app.innerHTML = `<p class="error-message">Data episode tidak ditemukan. Silakan kembali ke daftar episode.</p>`;
-                          return;
-                     }
                 }
                 app.innerHTML = content;
-            } catch (e) {
-                app.innerHTML = `<p class="error-message">Gagal memuat. Periksa URL API di app.js atau coba lagi. (${e.message})</p>`;
+            } catch (e) { 
+                app.innerHTML = `<p class="error-message">Gagal memuat. Periksa URL API di app.js atau coba lagi. (${e.message})</p>`; 
             }
         }
     };
 
-    // Fungsi lainnya
     const initSlider = () => {
         const track = document.getElementById('slider-track');
         const dots = document.querySelectorAll('.slider-dot');
-
+        
         if (!track || !dots.length) return;
-
+        
         const updateSlider = (index) => {
             slideIndex = index;
             track.style.transform = `translateX(-${index * 100}%)`;
@@ -354,11 +316,11 @@ function initializeRouter() {
                 dot.classList.toggle('active', i === index);
             });
         };
-
+        
         dots.forEach((dot, index) => {
             dot.addEventListener('click', () => updateSlider(index));
         });
-
+        
         slideInterval = setInterval(() => {
             slideIndex = (slideIndex + 1) % dots.length;
             updateSlider(slideIndex);
@@ -387,23 +349,23 @@ function initializeRouter() {
             const finalThumbnail = thumbnail !== 'null' && thumbnail ? thumbnail : data.thumbnail;
             app.innerHTML = templates.detailPage(data, title, finalThumbnail);
         } catch (e) {
-            app.innerHTML = `<p class="error-message">Gagal memuat detail anime. (${e.message})</p>`;
+            app.innerHTML = '<p class="error-message">Gagal memuat detail anime.</p>';
         }
     };
 
     const handleWatch = async (link, episodeIndex = 0) => {
         app.innerHTML = templates.loader();
         currentEpisodeIndex = episodeIndex;
-
+        
         const animeTitle = currentAnimeData?.title || 'anime';
         const animeSlug = animeTitle.toLowerCase().replace(/[^a-z0-9]/g, '-');
         updateURL(`/${animeSlug}-episode-${episodeIndex + 1}`);
-
+        
         try {
             const data = await fetch(`${API_URL}?url=${encodeURIComponent(link)}`).then(res => res.json());
             app.innerHTML = templates.watchPage(data, episodeIndex);
         } catch (e) {
-            app.innerHTML = `<p class="error-message">Gagal memuat video. (${e.message})</p>`;
+            app.innerHTML = '<p class="error-message">Gagal memuat video.</p>';
         }
     };
 
@@ -415,13 +377,13 @@ function initializeRouter() {
     const toggleSubscription = (title, thumbnail, url) => {
         let subscriptions = JSON.parse(localStorage.getItem('subscriptions') || '[]');
         const existingIndex = subscriptions.findIndex(sub => sub.title === title);
-
+        
         if (existingIndex > -1) {
             subscriptions.splice(existingIndex, 1);
         } else {
             subscriptions.push({ title, thumbnail, url });
         }
-
+        
         localStorage.setItem('subscriptions', JSON.stringify(subscriptions));
         return existingIndex === -1;
     };
@@ -459,8 +421,8 @@ function initializeRouter() {
 
         // Handle episode cards
         const epCard = e.target.closest('.episode-card');
-        if (epCard) {
-            e.preventDefault();
+        if (epCard) { 
+            e.preventDefault(); 
             const episodeIndex = parseInt(epCard.dataset.episodeIndex) || 0;
             handleWatch(epCard.dataset.link, episodeIndex);
             return;
@@ -473,9 +435,9 @@ function initializeRouter() {
             const title = btn.dataset.title;
             const thumbnail = btn.dataset.thumbnail;
             const url = btn.dataset.url;
-
+            
             const isNowSubscribed = toggleSubscription(title, thumbnail, url);
-
+            
             btn.classList.add('animating');
             setTimeout(() => {
                 btn.classList.toggle('subscribed', isNowSubscribed);
@@ -508,11 +470,11 @@ function initializeRouter() {
             if (currentAnimeData) {
                 const animeSlug = currentAnimeData.title.toLowerCase().replace(/[^a-z0-9]/g, '-');
                 updateURL(`/${animeSlug}-pilih-episode`);
-                router.render('detail');
+                app.innerHTML = templates.detailPage(currentAnimeData, currentAnimeData.title, currentAnimeData.thumbnail);
             }
         }
 
-        // Handle episode navigation
+        // Handle episode navigation - FIXED
         if (e.target.closest('#prev-episode') && !e.target.closest('#prev-episode').disabled) {
             e.preventDefault();
             if (currentEpisodeIndex > 0 && currentAnimeData?.episodes) {
@@ -527,7 +489,7 @@ function initializeRouter() {
             }
         }
 
-        // Handle episode grid
+        // Handle episode grid - FIXED
         const gridItem = e.target.closest('.episode-grid-item');
         if (gridItem) {
             e.preventDefault();
@@ -550,11 +512,21 @@ function initializeRouter() {
     window.addEventListener('popstate', () => {
         const page = getCurrentPage();
         const params = getURLParams();
-
+        
         if (page === 'search' && params.s) {
             router.render('search', { query: params.s });
         } else {
             router.render(page);
         }
     });
-}
+
+    // Initialize router
+    const initialPage = getCurrentPage();
+    const initialParams = getURLParams();
+    
+    if (initialPage === 'search' && initialParams.s) {
+        router.render('search', { query: initialParams.s });
+    } else {
+        router.render(initialPage);
+    }
+});
