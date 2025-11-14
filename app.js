@@ -9,6 +9,52 @@ document.addEventListener('DOMContentLoaded', () => {
     let currentEpisodeIndex = 0;
     let slideIndex = 0;
     let slideInterval;
+    
+    // Variabel untuk menyimpan halaman terakhir (untuk tombol kembali)
+    let lastPageContext = { page: 'home', params: {} };
+
+    // --- Fungsi Baru: Inisialisasi Partikel Emas ---
+    function initParticles() {
+        const container = document.getElementById('particle-container');
+        if (!container) return;
+        const particleCount = 40; // Jumlah partikel
+        for (let i = 0; i < particleCount; i++) {
+            const particle = document.createElement('div');
+            particle.classList.add('particle');
+            const size = Math.random() * 3 + 1; // Ukuran 1px - 4px
+            particle.style.width = `${size}px`;
+            particle.style.height = `${size}px`;
+            particle.style.left = `${Math.random() * 100}vw`;
+            const duration = Math.random() * 10 + 15; // Durasi 15s - 25s
+            const delay = Math.random() * 15; // Delay awal acak
+            particle.style.animationDuration = `${duration}s`;
+            particle.style.animationDelay = `${delay}s`;
+            container.appendChild(particle);
+        }
+    }
+
+    // --- Fungsi Baru: Inisialisasi Animasi Scroll ---
+    function initScrollAnimation() {
+        const animatedCards = document.querySelectorAll('.latest-section .anime-card');
+        if (!animatedCards.length) return;
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach((entry, index) => {
+                if (entry.isIntersecting) {
+                    // Menambahkan delay bertahap untuk efek stagger
+                    entry.target.style.transitionDelay = `${index * 50}ms`;
+                    entry.target.classList.add('is-visible');
+                    observer.unobserve(entry.target); // Berhenti mengamati setelah animasi
+                }
+            });
+        }, {
+            rootMargin: '0px 0px -50px 0px' // Memicu sedikit sebelum elemen penuh terlihat
+        });
+
+        animatedCards.forEach(card => {
+            observer.observe(card);
+        });
+    }
 
     // Initialize Firebase Auth
     if (window.firebaseAuth) {
@@ -41,7 +87,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const getCurrentPage = () => {
         const path = window.location.pathname;
         if (path === '/' || path === '/index') return 'home';
-        // Menghapus path '/subscribe'
         if (path === '/akun') return 'account';
         if (path.includes('-episode-')) return 'watch';
         if (path.includes('-pilih-episode')) return 'detail';
@@ -118,8 +163,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 </div>
             </div>`,
             
-        // Menghapus template subscribePage
-        
         accountPage: () => `
             <div class="page-title">Akun</div>
             <div class="account-section">
@@ -179,15 +222,23 @@ document.addEventListener('DOMContentLoaded', () => {
             </a>`,
             
         detailPage: (data, title, thumbnail) => {
-            // Menghapus logika isSubscribed
-            const animeSlug = title.toLowerCase().replace(/[^a-z0-9]/g, '-');
             return `
-                <div class="detail-header">
-                    <img src="${thumbnail}" alt="${title}">
-                    <div class="detail-info">
-                        <h2>${title}</h2>
-                        <p>Total Episode: ${data.episodeCount || '?'}</p>
-                        <!-- Tombol subscribe dihapus -->
+                <div class="detail-header-container">
+                    <!-- Tombol Kembali Baru -->
+                    <div class="watch-header" style="margin-bottom: 0; padding: 0;">
+                         <button id="back-to-list" class="back-btn">
+                            <svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
+                            Kembali
+                        </button>
+                        <h2 class="page-title-header">Detail Anime</h2>
+                    </div>
+
+                    <div class="detail-header">
+                        <img src="${thumbnail}" alt="${title}">
+                        <div class="detail-info">
+                            <h2>${title}</h2>
+                            <p>Total Episode: ${data.episodeCount || '?'}</p>
+                        </div>
                     </div>
                 </div>
                 <div class="episode-list">
@@ -201,7 +252,6 @@ document.addEventListener('DOMContentLoaded', () => {
         
         watchPage: (data, episodeIndex = 0) => {
             const episodes = currentAnimeData?.episodes || [];
-            const currentEp = episodes[episodeIndex];
             const hasPrev = episodeIndex > 0;
             const hasNext = episodeIndex < episodes.length - 1;
             
@@ -240,7 +290,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 <svg viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
                 <span>Utama</span>
             </button>
-            <!-- Tombol Subscribe Dihapus -->
             <button class="nav-button ${activePage === 'account' ? 'active' : ''}" data-page="account">
                 <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10s10-4.48 10-10S17.52 2 12 2m0 4c1.93 0 3.5 1.57 3.5 3.5S13.93 13 12 13s-3.5-1.57-3.5-3.5S10.07 6 12 6m0 13c-2.33 0-4.31-1.46-5.11-3.5h10.22c-.8 2.04-2.78 3.5-5.11 3.5Z"/></svg>
                 <span>Akun</span>
@@ -250,6 +299,21 @@ document.addEventListener('DOMContentLoaded', () => {
     const router = {
         currentPage: getCurrentPage(),
         render: async (page, params = {}) => {
+            // Menyimpan konteks halaman sebelumnya
+            if (page === 'home' || page === 'search' || page === 'account') {
+                // Jangan update jika hanya navigasi ke halaman yang sama (misal, refresh akun)
+                if (page !== router.currentPage) {
+                   lastPageContext = { page: router.currentPage, params: getURLParams() };
+                }
+            }
+            
+            // Menyimpan konteks halaman saat ini (terutama untuk pencarian)
+            if (page === 'search') {
+                lastPageContext = { page: 'search', params: params };
+            } else if (page === 'home') {
+                lastPageContext = { page: 'home', params: {} };
+            }
+
             router.currentPage = page;
             app.innerHTML = templates.loader();
             bottomNav.innerHTML = templates.bottomNav(page);
@@ -261,26 +325,28 @@ document.addEventListener('DOMContentLoaded', () => {
                     const data = await fetch(API_URL).then(res => res.json());
                     if (!data.results || data.results.length === 0) throw new Error("API tidak mengembalikan hasil.");
                     content = templates.homePage(data);
+                    app.innerHTML = content;
                     setTimeout(initSlider, 100);
+                    setTimeout(initScrollAnimation, 100); // Memicu animasi scroll
                 } else if (page === 'search') {
                     const query = params.query || getURLParams().s;
                     updateURL('/', { s: query });
                     const data = await fetch(`${API_URL}?search=${encodeURIComponent(query)}`).then(res => res.json());
                     content = templates.searchPage(query, data.results || []);
-                } 
-                // Menghapus 'else if (page === 'subscribe')'
-                else if (page === 'account') {
+                    app.innerHTML = content;
+                } else if (page === 'account') {
                     updateURL('/akun');
                     content = templates.accountPage();
+                    app.innerHTML = content;
                 } else {
-                    // Fallback untuk halaman yang mungkin terhapus (seperti subscribe)
+                    // Fallback
                     updateURL('/index');
                     const data = await fetch(API_URL).then(res => res.json());
-                    if (!data.results || data.results.length === 0) throw new Error("API tidak mengembalikan hasil.");
                     content = templates.homePage(data);
+                    app.innerHTML = content;
                     setTimeout(initSlider, 100);
+                    setTimeout(initScrollAnimation, 100);
                 }
-                app.innerHTML = content;
             } catch (e) { 
                 app.innerHTML = `<p class="error-message">Gagal memuat. Coba muat ulang halaman. (${e.message})</p>`; 
             }
@@ -305,6 +371,7 @@ document.addEventListener('DOMContentLoaded', () => {
             dot.addEventListener('click', () => updateSlider(index));
         });
         
+        if (slideInterval) clearInterval(slideInterval); // Hapus interval sebelumnya
         slideInterval = setInterval(() => {
             slideIndex = (slideIndex + 1) % dots.length;
             updateSlider(slideIndex);
@@ -320,7 +387,6 @@ document.addEventListener('DOMContentLoaded', () => {
         if (isFromHome) {
             const searchData = await fetch(`${API_URL}?search=${encodeURIComponent(title)}`).then(res => res.json());
             if (searchData.results && searchData.results.length > 0) {
-                // Mencari link yang lebih cocok jika memungkinkan
                 const matchingResult = searchData.results.find(r => r.title.toLowerCase() === title.toLowerCase());
                 detailLink = matchingResult ? matchingResult.link : searchData.results[0].link;
             } else {
@@ -331,6 +397,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
         try {
             const data = await fetch(`${API_URL}?animePage=${encodeURIComponent(detailLink)}`).then(res => res.json());
+            
+            // --- PERBAIKAN BUG EPISODE TERBALIK ---
+            if (data.episodes && Array.isArray(data.episodes)) {
+                data.episodes.reverse(); // Membalik array agar Episode 1 ada di index 0
+            }
+            // --- AKHIR PERBAIKAN ---
+
             const finalThumbnail = thumbnail !== 'null' && thumbnail ? thumbnail : data.thumbnail || 'https://placehold.co/200x300/eeeeee/aaaaaa?text=No+Image';
             currentAnimeData = { ...data, title, thumbnail: finalThumbnail };
             app.innerHTML = templates.detailPage(data, title, finalThumbnail);
@@ -355,15 +428,13 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
-    // Menghapus fungsi isAnimeSubscribed dan toggleSubscription
-
     // Event Listeners
     app.addEventListener('submit', e => {
         if (e.target.id === 'main-search-form') {
             e.preventDefault();
             const query = e.target.querySelector('#main-search-input').value.trim();
             if (query) {
-                clearInterval(slideInterval);
+                if (slideInterval) clearInterval(slideInterval);
                 router.render('search', { query });
             }
         }
@@ -374,13 +445,11 @@ document.addEventListener('DOMContentLoaded', () => {
         const card = e.target.closest('.anime-card, .search-result-card, .slide-card');
         if (card) {
             e.preventDefault();
-            clearInterval(slideInterval);
+            if (slideInterval) clearInterval(slideInterval);
             const isFromHome = card.classList.contains('anime-card') || card.classList.contains('slide-card');
             handleDetail(card.dataset.link, card.dataset.title, card.dataset.thumbnail, isFromHome);
             return;
         }
-
-        // Menghapus handler .subscription-card
 
         // Handle episode cards
         const epCard = e.target.closest('.episode-card');
@@ -390,8 +459,6 @@ document.addEventListener('DOMContentLoaded', () => {
             handleWatch(epCard.dataset.link, episodeIndex);
             return;
         }
-
-        // Menghapus handler #subscribe-btn
 
         // Handle Google login
         if (e.target.closest('#google-login-btn')) {
@@ -408,6 +475,13 @@ document.addEventListener('DOMContentLoaded', () => {
             if (window.firebaseAuth) {
                 window.firebaseAuth.signOut(window.firebaseAuth.auth);
             }
+        }
+
+        // --- Handler Tombol Kembali (dari Detail ke List) ---
+        if (e.target.closest('#back-to-list')) {
+            e.preventDefault();
+            router.render(lastPageContext.page, lastPageContext.params);
+            return;
         }
 
         // Handle back to detail
@@ -449,26 +523,30 @@ document.addEventListener('DOMContentLoaded', () => {
     bottomNav.addEventListener('click', e => {
         const navButton = e.target.closest('.nav-button');
         if (navButton) {
-            clearInterval(slideInterval);
+            if (slideInterval) clearInterval(slideInterval);
             router.render(navButton.dataset.page);
         }
     });
 
     // Handle browser navigation
     window.addEventListener('popstate', () => {
+        if (slideInterval) clearInterval(slideInterval);
         const page = getCurrentPage();
         const params = getURLParams();
         
         if (page === 'search' && params.s) {
             router.render('search', { query: params.s });
         } else if (page === 'detail' || page === 'watch') {
-            // Jika pengguna menekan 'back' dari halaman detail atau watch,
-            // kita arahkan ke home untuk menghindari state yang hilang.
-            router.render('home');
+            // Jika pengguna menekan 'back' dari halaman detail/watch,
+            // kembalikan ke konteks halaman terakhir (home/search)
+            router.render(lastPageContext.page, lastPageContext.params);
         } else {
             router.render(page);
         }
     });
+
+    // --- Inisialisasi Partikel Saat Load ---
+    initParticles();
 
     // Initialize router
     const initialPage = getCurrentPage();
@@ -477,11 +555,11 @@ document.addEventListener('DOMContentLoaded', () => {
     if (initialPage === 'search' && initialParams.s) {
         router.render('search', { query: initialParams.s });
     } else if (initialPage === 'detail' || initialPage === 'watch') {
-        // Jika me-refresh halaman detail atau watch, data akan hilang.
-        // Arahkan ke home.
+        // Jika me-refresh halaman detail, kembalikan ke home
         router.render('home');
     } else {
         router.render(initialPage);
     }
 });
+
 
