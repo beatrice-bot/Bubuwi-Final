@@ -6,22 +6,21 @@
     <title>Bubuwi-V3</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <!-- Mengganti font menjadi Playfair Display (Judul) dan Montserrat (Body) untuk nuansa elegan -->
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Montserrat:wght@400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
     <link rel="manifest" href="manifest.json">
     <link rel="apple-touch-icon" href="https://i.imgur.com/9uK2OPw.png">
-    <!-- Mengubah theme-color menjadi putih agar sesuai dengan tema baru -->
     <meta name="theme-color" content="#ffffff">
 </head>
 <body>
-    <!-- Menghapus elemen background-wallpaper, overlay, dan shooting-star untuk tampilan putih bersih -->
+    <!-- Kontainer untuk partikel emas -->
+    <div id="particle-container"></div>
 
     <main id="app-content"></main>
 
     <nav class="bottom-nav"></nav>
 
-    <!-- Firebase SDK (Tidak diubah, sesuai permintaan) -->
+    <!-- Firebase SDK (Tidak diubah) -->
     <script type="module">
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
         import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
@@ -51,4 +50,5 @@
     </script>
 </body>
 </html>
+
 
