@@ -1,7 +1,20 @@
 :root {
-    /* Palet Warna Putih Kerajaan */
+    /* Palet Warna Dinamis (Baru)
+      Variabel ini akan diubah oleh mode siang/malam
+    */
+    --bg-primary-themed: #ffffff;
+    --bg-secondary-themed: #fdfdfd;
+    --bg-card-themed: #ffffff;
+    --text-primary-themed: #2c2c2c;
+    --text-secondary-themed: #555555;
+    --border-color-themed: #eeeeee;
+    --shadow-color-themed: rgba(0, 0, 0, 0.05);
+    --bottom-nav-bg: rgba(255, 255, 255, 0.9);
+    --cloud-color: #f0f0f0;
+
+    /* Palet Warna Putih Kerajaan (Asli) */
     --bg-primary: #ffffff;
-    --bg-secondary: #fdfdfd; /* Sedikit lebih gelap dari putih murni */
+    --bg-secondary: #fdfdfd;
     --bg-card: #ffffff;
     --text-primary: #2c2c2c;
     --text-secondary: #555555;
@@ -19,14 +32,25 @@
     --border-radius-large: 20px;
     --border-color: #eeeeee;
 
-    /* Bayangan (Shadow) yang Halus untuk kesan mewah */
-    --shadow-small: 0 2px 8px rgba(0, 0, 0, 0.05);
-    --shadow-medium: 0 6px 16px rgba(0, 0, 0, 0.07);
-    --shadow-large: 0 10px 30px rgba(0, 0, 0, 0.1);
+    --shadow-small: 0 2px 8px var(--shadow-color-themed);
+    --shadow-medium: 0 6px 16px rgba(0, 0, 0, 0.07); /* Tetap, untuk bayangan lebih kuat */
+    --shadow-large: 0 10px 30px rgba(0, 0, 0, 0.1); /* Tetap */
 
-    /* Font Tematik */
     --font-title: 'Playfair Display', serif;
     --font-body: 'Montserrat', sans-serif;
+}
+
+/* --- Mode Malam (Baru) --- */
+body.night-mode {
+    --bg-primary-themed: #0B1120; /* Biru malam gelap */
+    --bg-secondary-themed: #121A2D;
+    --bg-card-themed: #19223A;
+    --text-primary-themed: #E0E3EB; /* Putih pudar */
+    --text-secondary-themed: #A0A9B8; /* Abu-abu kebiruan */
+    --border-color-themed: #2A3652;
+    --shadow-color-themed: rgba(0, 0, 0, 0.2);
+    --bottom-nav-bg: rgba(17, 26, 45, 0.9); /* Latar nav malam */
+    --cloud-color: #3d4a69; /* Awan gelap */
 }
 
 * {
@@ -37,14 +61,118 @@
 
 body {
     font-family: var(--font-body);
-    background: var(--bg-primary);
-    color: var(--text-primary);
+    /* Menggunakan variabel tema baru */
+    background: var(--bg-primary-themed);
+    color: var(--text-primary-themed);
     line-height: 1.6;
     overflow-x: hidden;
-    padding-bottom: 80px; /* Ruang untuk bottom nav */
+    padding-bottom: 80px;
+    transition: background 0.5s ease, color 0.5s ease; /* Transisi halus */
 }
 
-/* Latar Belakang Partikel Emas */
+/* --- Latar Belakang Visual (Baru) --- */
+#time-theme-visuals {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 250px; /* Area untuk visual */
+    z-index: -2; /* Di belakang partikel */
+    overflow: hidden;
+    pointer-events: none;
+}
+
+/* Matahari */
+.sun {
+    position: absolute;
+    top: 30px;
+    left: 40px;
+    width: 100px;
+    height: 100px;
+    background: #FFD700; /* Emas */
+    border-radius: 50%;
+    box-shadow: 0 0 40px #FFD700, 0 0 60px #FFD700;
+    opacity: 1;
+    transform: scale(1);
+    transition: opacity 0.5s ease, transform 0.5s ease;
+}
+
+/* Bulan */
+.moon {
+    position: absolute;
+    top: 30px;
+    left: 40px;
+    width: 80px;
+    height: 80px;
+    background: #E0E3EB;
+    border-radius: 50%;
+    box-shadow: 0 0 30px #E0E3EB, 0 0 50px #E0E3EB,
+                inset -10px 10px 10px rgba(0,0,0,0.1); /* Kawah bulan simpel */
+    opacity: 0;
+    transform: scale(0.8);
+    transition: opacity 0.5s ease, transform 0.5s ease;
+}
+
+/* Awan */
+.cloud {
+    position: absolute;
+    width: 150px;
+    height: 50px;
+    background: var(--cloud-color);
+    border-radius: 25px;
+    transition: background 0.5s ease;
+}
+.cloud::before, .cloud::after {
+    content: '';
+    position: absolute;
+    background: var(--cloud-color);
+    border-radius: 50%;
+    transition: background 0.5s ease;
+}
+.cloud::before {
+    width: 70px;
+    height: 70px;
+    top: -35px;
+    left: 20px;
+}
+.cloud::after {
+    width: 90px;
+    height: 90px;
+    top: -45px;
+    right: 10px;
+}
+.cloud-1 {
+    top: 20px;
+    left: 20px;
+    transform: scale(0.8);
+    opacity: 0.7;
+    animation: drift 60s linear infinite alternate;
+}
+.cloud-2 {
+    top: 40px;
+    left: 150px;
+    transform: scale(1.1);
+    opacity: 0.9;
+    animation: drift 80s linear infinite alternate-reverse;
+}
+
+@keyframes drift {
+    from { transform: translateX(-50px) scale(var(--scale, 1)); }
+    to { transform: translateX(50px) scale(var(--scale, 1)); }
+}
+
+/* Logika Tampilan Siang/Malam Visual */
+body.night-mode .sun {
+    opacity: 0;
+    transform: scale(0.8);
+}
+body.night-mode .moon {
+    opacity: 1;
+    transform: scale(1);
+}
+
+
+/* --- Latar Belakang Partikel (Dimodifikasi) --- */
 #particle-container {
     position: fixed;
     top: 0;
@@ -56,31 +184,155 @@ body {
     pointer-events: none;
 }
 
-.particle {
+/* Partikel Emas (Siang) */
+.particle.gold {
     position: absolute;
     background: var(--accent-primary); /* Emas */
     border-radius: 50%;
     opacity: 0.6;
     animation: rise 15s infinite linear;
+    display: block; /* Tampil default (siang) */
 }
 
 @keyframes rise {
     0% {
-        transform: translateY(100vh);
+        transform: translateY(100vh) scale(0.5);
         opacity: 0;
     }
     10% {
-        opacity: 0.6;
+        opacity: 0.8;
     }
     90% {
-        opacity: 0.6;
+        opacity: 0.8;
     }
     100% {
-        transform: translateY(-10vh);
+        transform: translateY(-10vh) scale(1);
         opacity: 0;
     }
 }
 
+/* Bintang Jatuh (Malam) - Baru */
+.particle.shooting-star {
+    position: absolute;
+    width: 120px; /* Panjang ekor */
+    height: 2px;
+    background: linear-gradient(to left, rgba(255, 255, 255, 0.8), transparent);
+    border-radius: 2px;
+    animation: shoot 5s infinite linear;
+    transform: rotate(-45deg); /* Arah jatuh */
+    opacity: 0;
+    display: none; /* Sembunyi default */
+}
+
+@keyframes shoot {
+    0% {
+        transform: translate(100vw, -10vh) rotate(-45deg);
+        opacity: 0;
+    }
+    20% {
+        opacity: 1;
+    }
+    80% {
+        opacity: 1;
+    }
+    100% {
+        transform: translate(-10vw, 100vh) rotate(-45deg);
+        opacity: 0;
+    }
+}
+
+/* Logika Tampilan Partikel Siang/Malam */
+body.night-mode .particle.gold {
+    display: none;
+}
+body.night-mode .particle.shooting-star {
+    display: block;
+}
+
+
+/* --- Penyesuaian Elemen UI dengan Tema (Baru) --- */
+
+.anime-card, .search-result-card, .episode-card {
+    background: var(--bg-card-themed);
+    border-color: var(--border-color-themed);
+    color: var(--text-primary-themed);
+    box-shadow: var(--shadow-small);
+}
+.anime-card:hover, .search-result-card:hover, .episode-card:hover {
+    border-color: var(--accent-primary);
+    background: var(--bg-secondary-themed);
+}
+
+.featured-section {
+    background: var(--bg-secondary-themed);
+    border-color: var(--border-color-themed);
+    box-shadow: var(--shadow-small);
+}
+
+#main-search-input {
+    background: var(--bg-secondary-themed);
+    border-color: var(--border-color-themed);
+    color: var(--text-primary-themed);
+}
+#main-search-input:focus {
+    border-color: var(--accent-primary);
+}
+
+.user-profile {
+    background: var(--bg-card-themed);
+    border-color: var(--border-color-themed);
+    box-shadow: var(--shadow-medium);
+}
+.user-info p {
+    color: var(--text-secondary-themed);
+}
+
+.google-login-btn {
+    background: var(--bg-card-themed);
+    border-color: var(--border-color-themed);
+    color: var(--text-primary-themed);
+    box-shadow: var(--shadow-small);
+}
+
+.contact-link {
+    background: var(--bg-secondary-themed);
+    border-color: var(--border-color-themed);
+    color: var(--text-primary-themed);
+}
+
+.back-btn {
+    background: var(--bg-secondary-themed);
+    color: var(--text-primary-themed);
+    border-color: var(--border-color-themed);
+}
+
+.episode-grid-item {
+    background: var(--bg-secondary-themed);
+    border-color: var(--border-color-themed);
+}
+.episode-grid-item.active {
+    background: var(--accent-primary);
+    border-color: var(--accent-primary);
+    color: white; /* Kontras di malam hari */
+}
+body.night-mode .episode-grid-item.active {
+    color: #ffffff;
+}
+
+.bottom-nav {
+    background: var(--bottom-nav-bg);
+    border-top-color: var(--border-color-themed);
+}
+
+.nav-button {
+    color: var(--text-secondary-themed);
+}
+.nav-button.active {
+    color: var(--accent-primary);
+}
+
+/* Sisa CSS dari file asli (tidak diubah, hanya menggunakan variabel baru jika relevan) */
+/* ... (sisa .loader, .hero-section, .slider-container, dll.) ... */
 
 /* Loading Animation */
 .loader {
@@ -147,6 +399,9 @@ body {
     align-items: center;
     justify-content: center;
 }
+body.night-mode .logo-overlay {
+    background: rgba(30, 40, 60, 0.7);
+}
 
 .hero-logo {
     width: 60px;
@@ -169,19 +424,15 @@ body {
 
 /* Featured Slider (Anime Pilihan) */
 .featured-section {
-    /* Membungkus section agar "nyatu" */
-    padding: 1.5rem 0.5rem; /* Padding internal */
-    margin: 0 1rem 2rem 1rem; /* Margin eksternal */
-    background: var(--bg-secondary); /* Latar belakang sedikit beda */
-    border: 1px solid var(--border-color);
+    padding: 1.5rem 0.5rem;
+    margin: 0 1rem 2rem 1rem;
+    border: 1px solid var(--border-color-themed);
     border-radius: var(--border-radius-large);
-    box-shadow: var(--shadow-small);
     position: relative;
 }
 
-/* Ornamen hiasan */
 .featured-section::before {
-    content: '★'; /* Bintang sebagai ornamen */
+    content: '★';
     position: absolute;
     top: 1.25rem;
     left: 50%;
@@ -196,7 +447,7 @@ body {
     font-size: 1.75rem;
     font-weight: 700;
     margin-bottom: 1.5rem;
-    margin-top: 1.5rem; /* Memberi ruang dari ornamen */
+    margin-top: 1.5rem;
     text-align: center;
     background: var(--accent-gradient);
     -webkit-background-clip: text;
@@ -213,7 +464,6 @@ body {
 .slider-wrapper {
     overflow: hidden;
     border-radius: var(--border-radius-large);
-    /* Shadow & border dipindah ke parent (.featured-section) */
     box-shadow: none; 
 }
 
@@ -226,7 +476,7 @@ body {
     min-width: 100%;
     position: relative;
     cursor: pointer;
-    background: var(--bg-secondary);
+    background: var(--bg-secondary-themed);
 }
 
 .slide-image {
@@ -294,7 +544,7 @@ body {
     width: 10px;
     height: 10px;
     border-radius: 50%;
-    background: var(--border-color);
+    background: var(--border-color-themed);
     cursor: pointer;
     transition: all 0.3s ease;
 }
@@ -320,25 +570,6 @@ body {
     position: relative;
     display: flex;
     align-items: center;
-}
-
-#main-search-input {
-    width: 100%;
-    padding: 1rem 1.5rem;
-    padding-right: 4rem;
-    font-size: 1rem;
-    font-family: var(--font-body);
-    border: 1px solid var(--border-color);
-    border-radius: var(--border-radius-large);
-    background: var(--bg-secondary);
-    color: var(--text-primary);
-    transition: all 0.3s ease;
-}
-
-#main-search-input:focus {
-    outline: none;
-    border-color: var(--accent-primary);
-    box-shadow: 0 0 0 4px rgba(212, 175, 55, 0.1);
 }
 
 .search-btn {
@@ -383,23 +614,6 @@ body {
     margin: 0 auto;
 }
 
-.search-result-card {
-    background: var(--bg-card);
-    border-radius: var(--border-radius);
-    overflow: hidden;
-    text-decoration: none;
-    color: var(--text-primary);
-    transition: all 0.3s ease;
-    border: 1px solid var(--border-color);
-    position: relative;
-    box-shadow: var(--shadow-small);
-}
-
-.search-result-card:hover {
-    transform: translateY(-4px);
-    box-shadow: var(--shadow-medium);
-}
-
 .search-result-card img {
     width: 100%;
     aspect-ratio: 2 / 3;
@@ -442,30 +656,17 @@ body {
     border-radius: var(--border-radius);
     overflow: hidden;
     text-decoration: none;
-    color: var(--text-primary);
-    background: var(--bg-card);
-    border: 1px solid var(--border-color);
-    box-shadow: var(--shadow-small);
     
-    /* Style untuk Animasi Scroll */
     opacity: 0;
     transform: translateY(30px);
-    transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+    transition: opacity 0.6s ease-out, transform 0.6s ease-out, background 0.3s ease, border-color 0.3s ease;
 }
 
 .anime-card.is-visible {
-    /* Kelas yang ditambahkan oleh JS */
     opacity: 1;
     transform: translateY(0);
 }
 
-
-.anime-card:hover {
-    transform: translateY(-8px);
-    box-shadow: var(--shadow-medium);
-}
-
-/* Override hover transform jika sedang animasi */
 .anime-card.is-visible:hover {
     transform: translateY(-8px);
 }
@@ -512,7 +713,7 @@ body {
 .empty-state {
     text-align: center;
     padding: 3rem 1rem;
-    color: var(--text-secondary);
+    color: var(--text-secondary-themed);
     grid-column: 1 / -1;
 }
 
@@ -520,16 +721,6 @@ body {
 .account-section {
     padding: 0 1rem;
     margin-bottom: 2rem;
-}
-
-.user-profile {
-    background: var(--bg-card);
-    border-radius: var(--border-radius-large);
-    padding: 2rem;
-    border: 1px solid var(--border-color);
-    text-align: center;
-    margin-bottom: 2rem;
-    box-shadow: var(--shadow-medium);
 }
 
 .profile-picture {
@@ -557,40 +748,13 @@ body {
     margin-bottom: 0.5rem;
 }
 
-.user-info p {
-    color: var(--text-secondary);
-    margin-bottom: 1.5rem;
-}
-
-.google-login-btn {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.75rem;
-    width: 100%;
-    max-width: 300px;
-    margin: 0 auto;
-    padding: 1rem 1.5rem;
-    border: 1px solid var(--border-color);
-    border-radius: var(--border-radius-large);
-    background: white;
-    color: #333;
-    font-size: 1rem;
-    font-weight: 600;
-    font-family: var(--font-body);
-    cursor: pointer;
-    transition: all 0.3s ease;
-    box-shadow: var(--shadow-small);
-}
-
-.google-login-btn:hover {
-    transform: translateY(-2px);
-    box-shadow: var(--shadow-medium);
-}
-
 .google-login-btn svg {
     width: 24px;
     height: 24px;
+}
+/* Mengganti warna SVG Google di mode malam agar terlihat */
+body.night-mode .google-login-btn {
+    color: var(--text-primary-themed);
 }
 
 .auth-btn {
@@ -624,7 +788,7 @@ body {
     font-size: 1.5rem;
     font-weight: 700;
     margin-bottom: 1.5rem;
-    color: var(--text-primary);
+    color: var(--text-primary-themed);
 }
 
 .contact-page-logo {
@@ -644,24 +808,13 @@ body {
     object-fit: contain;
 }
 
-.contact-link {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    padding: 1rem 1.5rem;
-    border-radius: var(--border-radius);
-    text-decoration: none;
-    color: var(--text-primary);
-    background: var(--bg-secondary);
-    margin-bottom: 1rem;
-    border: 1px solid var(--border-color);
-    transition: all 0.3s ease;
-}
-
 .contact-link:hover {
     background: #f1f1f1;
     transform: translateY(-2px);
     box-shadow: var(--shadow-small);
+}
+body.night-mode .contact-link:hover {
+    background: var(--bg-primary-themed); /* Sedikit lebih gelap saat di-hover */
 }
 
 .contact-link img {
@@ -669,10 +822,14 @@ body {
     height: 32px;
     border-radius: 8px;
 }
+/* Filter ikon di mode malam agar tidak terlalu mencolok */
+body.night-mode .contact-link img {
+    filter: grayscale(20%) brightness(80%);
+}
+
 
 /* Detail Page */
 .detail-header-container {
-    /* Wrapper untuk header dan tombol kembali */
     padding: 1rem 1rem 0 1rem;
     margin-bottom: 1rem;
 }
@@ -680,13 +837,13 @@ body {
 .detail-header {
     display: flex;
     gap: 1.5rem;
-    margin-top: 1rem; /* Jarak dari tombol kembali */
+    margin-top: 1rem;
 }
 
 .detail-header img {
     width: 120px;
     border-radius: var(--border-radius);
-    border: 1px solid var(--border-color);
+    border: 1px solid var(--border-color-themed);
     box-shadow: var(--shadow-medium);
 }
 
@@ -702,32 +859,13 @@ body {
 }
 
 .detail-info p {
-    color: var(--text-secondary);
+    color: var(--text-secondary-themed);
     margin-bottom: 1.5rem;
     font-size: 0.9rem;
 }
 
 .episode-list {
     padding: 0 1rem;
-}
-
-.episode-card {
-    background: var(--bg-card);
-    padding: 1.25rem;
-    border-radius: var(--border-radius);
-    margin-bottom: 0.75rem;
-    text-decoration: none;
-    color: var(--text-primary);
-    display: block;
-    border: 1px solid var(--border-color);
-    transition: all 0.3s ease;
-    box-shadow: var(--shadow-small);
-}
-
-.episode-card:hover {
-    background: var(--bg-secondary);
-    transform: translateY(-2px);
-    border-color: var(--accent-primary);
 }
 
 .episode-card h3 {
@@ -745,25 +883,12 @@ body {
     margin-bottom: 1rem;
 }
 
-.back-btn {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 0.5rem 1rem;
-    border: none;
-    border-radius: var(--border-radius);
-    background: var(--bg-secondary);
-    color: var(--text-primary);
-    cursor: pointer;
-    transition: all 0.3s ease;
-    border: 1px solid var(--border-color);
-    /* Memastikan tombol kembali tidak terlalu lebar */
-    flex-shrink: 0;
-}
-
 .back-btn:hover {
     background: #f1f1f1;
     box-shadow: var(--shadow-small);
+}
+body.night-mode .back-btn:hover {
+    background: var(--bg-primary-themed);
 }
 
 .back-btn svg {
@@ -778,7 +903,6 @@ body {
     font-size: 1.25rem;
     font-weight: 700;
     margin: 0;
-    /* Mencegah teks terlalu panjang */
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -851,62 +975,16 @@ body {
     margin-bottom: 2rem;
 }
 
-.episode-grid-item {
-    aspect-ratio: 1;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: var(--bg-secondary);
-    border-radius: var(--border-radius);
-    border: 1px solid var(--border-color);
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.3s ease;
-}
-
 .episode-grid-item:hover {
     background: #f1f1f1;
     transform: translateY(-2px);
 }
-
-.episode-grid-item.active {
-    background: var(--accent-primary);
-    color: white;
-    border-color: var(--accent-primary);
+body.night-mode .episode-grid-item:hover {
+    background: var(--bg-primary-themed);
 }
+
 
 /* Bottom Navigation */
-.bottom-nav {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    display: flex;
-    background: rgba(255, 255, 255, 0.9);
-    backdrop-filter: blur(20px);
-    border-top: 1px solid var(--border-color);
-    z-index: 100;
-    padding: 0.5rem 0;
-}
-
-.nav-button {
-    flex: 1;
-    background: none;
-    border: none;
-    color: var(--text-secondary);
-    padding: 0.75rem 0.5rem;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 0.25rem;
-    cursor: pointer;
-    transition: all 0.3s ease;
-}
-
-.nav-button.active {
-    color: var(--accent-primary);
-}
-
 .nav-button svg {
     width: 24px;
     height: 24px;
@@ -933,7 +1011,6 @@ body {
     padding: 0 1rem;
 }
 
-/* Judul halaman detail yang digunakan bersama tombol kembali */
 .page-title-header {
     flex: 1;
     font-family: var(--font-title);
@@ -1038,5 +1115,4 @@ body {
         scroll-behavior: smooth;
     }
 }
-
 
