@@ -1,7 +1,7 @@
 :root {
     /* Palet Warna Putih Kerajaan */
     --bg-primary: #ffffff;
-    --bg-secondary: #f9f9f9;
+    --bg-secondary: #fdfdfd; /* Sedikit lebih gelap dari putih murni */
     --bg-card: #ffffff;
     --text-primary: #2c2c2c;
     --text-secondary: #555555;
@@ -44,12 +44,43 @@ body {
     padding-bottom: 80px; /* Ruang untuk bottom nav */
 }
 
-/* Menghapus Efek Background Gelap */
-.background-wallpaper,
-.background-overlay,
-.shooting-star {
-    display: none;
+/* Latar Belakang Partikel Emas */
+#particle-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1; /* Di belakang konten */
+    overflow: hidden;
+    pointer-events: none;
 }
+
+.particle {
+    position: absolute;
+    background: var(--accent-primary); /* Emas */
+    border-radius: 50%;
+    opacity: 0.6;
+    animation: rise 15s infinite linear;
+}
+
+@keyframes rise {
+    0% {
+        transform: translateY(100vh);
+        opacity: 0;
+    }
+    10% {
+        opacity: 0.6;
+    }
+    90% {
+        opacity: 0.6;
+    }
+    100% {
+        transform: translateY(-10vh);
+        opacity: 0;
+    }
+}
+
 
 /* Loading Animation */
 .loader {
@@ -65,7 +96,7 @@ body {
     width: 40px;
     height: 40px;
     border: 3px solid rgba(0, 0, 0, 0.1);
-    border-top: 3px solid var(--accent-primary); /* Menggunakan warna emas */
+    border-top: 3px solid var(--accent-primary);
     border-radius: 50%;
     animation: spin 1s linear infinite;
     margin-bottom: 1rem;
@@ -93,7 +124,6 @@ body {
     margin-bottom: 1.5rem;
     border-radius: var(--border-radius-large);
     overflow: hidden;
-    /* Menghapus border, mengganti dengan shadow */
     box-shadow: var(--shadow-large);
 }
 
@@ -111,7 +141,6 @@ body {
     width: 80px;
     height: 80px;
     border-radius: 50%;
-    /* Menghapus border, mengganti background */
     background: rgba(255, 255, 255, 0.7);
     backdrop-filter: blur(10px);
     display: flex;
@@ -130,19 +159,36 @@ body {
     font-family: var(--font-title);
     font-size: 2.5rem;
     font-weight: 700;
-    /* Menggunakan gradient Emas-Merah */
     background: var(--accent-gradient);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
     text-align: center;
-    letter-spacing: 1px; /* Mengurangi letter-spacing agar lebih rapi */
+    letter-spacing: 1px;
 }
 
-/* Featured Slider */
+/* Featured Slider (Anime Pilihan) */
 .featured-section {
-    padding: 0 1rem;
-    margin-bottom: 2rem;
+    /* Membungkus section agar "nyatu" */
+    padding: 1.5rem 0.5rem; /* Padding internal */
+    margin: 0 1rem 2rem 1rem; /* Margin eksternal */
+    background: var(--bg-secondary); /* Latar belakang sedikit beda */
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius-large);
+    box-shadow: var(--shadow-small);
+    position: relative;
+}
+
+/* Ornamen hiasan */
+.featured-section::before {
+    content: '★'; /* Bintang sebagai ornamen */
+    position: absolute;
+    top: 1.25rem;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 1.5rem;
+    color: var(--accent-primary);
+    opacity: 0.3;
 }
 
 .section-title {
@@ -150,8 +196,8 @@ body {
     font-size: 1.75rem;
     font-weight: 700;
     margin-bottom: 1.5rem;
+    margin-top: 1.5rem; /* Memberi ruang dari ornamen */
     text-align: center;
-    /* Menggunakan gradient Emas-Merah */
     background: var(--accent-gradient);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
@@ -167,8 +213,8 @@ body {
 .slider-wrapper {
     overflow: hidden;
     border-radius: var(--border-radius-large);
-    /* Menghapus border, mengganti dengan shadow */
-    box-shadow: var(--shadow-large);
+    /* Shadow & border dipindah ke parent (.featured-section) */
+    box-shadow: none; 
 }
 
 .slider-track {
@@ -224,13 +270,12 @@ body {
 }
 
 .slide-title {
-    font-family: var(--font-title); /* Menggunakan font judul */
-    font-size: 1.4rem; /* Sedikit lebih besar */
+    font-family: var(--font-title);
+    font-size: 1.4rem;
     font-weight: 700;
     color: white;
     margin: 0;
     line-height: 1.3;
-    /* Memastikan teks tidak terpotong aneh */
     display: -webkit-box;
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
@@ -249,13 +294,13 @@ body {
     width: 10px;
     height: 10px;
     border-radius: 50%;
-    background: var(--border-color); /* Warna dot non-aktif */
+    background: var(--border-color);
     cursor: pointer;
     transition: all 0.3s ease;
 }
 
 .slider-dot.active {
-    background: var(--accent-primary); /* Warna dot aktif (Emas) */
+    background: var(--accent-primary);
     transform: scale(1.2);
 }
 
@@ -371,7 +416,6 @@ body {
     font-weight: 600;
     margin: 0;
     line-height: 1.3;
-    /* Sanitasi Teks */
     display: -webkit-box;
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
@@ -399,15 +443,31 @@ body {
     overflow: hidden;
     text-decoration: none;
     color: var(--text-primary);
-    transition: all 0.3s ease;
     background: var(--bg-card);
     border: 1px solid var(--border-color);
     box-shadow: var(--shadow-small);
+    
+    /* Style untuk Animasi Scroll */
+    opacity: 0;
+    transform: translateY(30px);
+    transition: opacity 0.6s ease-out, transform 0.6s ease-out;
 }
+
+.anime-card.is-visible {
+    /* Kelas yang ditambahkan oleh JS */
+    opacity: 1;
+    transform: translateY(0);
+}
+
 
 .anime-card:hover {
     transform: translateY(-8px);
     box-shadow: var(--shadow-medium);
+}
+
+/* Override hover transform jika sedang animasi */
+.anime-card.is-visible:hover {
+    transform: translateY(-8px);
 }
 
 .anime-card img {
@@ -427,8 +487,7 @@ body {
     font-size: 0.9rem;
     font-weight: 600;
     line-height: 1.3;
-    color: white; /* Teks di atas gambar tetap putih */
-    /* Sanitasi Teks */
+    color: white;
     display: -webkit-box;
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
@@ -448,13 +507,6 @@ body {
     font-weight: 600;
     box-shadow: var(--shadow-small);
     z-index: 2;
-}
-
-/* Menghapus Halaman Subscribe */
-.subscription-grid,
-.subscription-card,
-.subscription-info {
-    display: none;
 }
 
 .empty-state {
@@ -485,7 +537,7 @@ body {
     height: 80px;
     border-radius: 50%;
     border: 3px solid transparent;
-    background: var(--gold-gradient); /* Gradient Emas */
+    background: var(--gold-gradient);
     padding: 3px;
     margin: 0 auto 1rem auto;
     display: block;
@@ -552,7 +604,7 @@ body {
 }
 
 .logout-btn {
-    background: var(--accent-secondary); /* Merah Tua */
+    background: var(--accent-secondary);
     color: white;
 }
 
@@ -615,15 +667,20 @@ body {
 .contact-link img {
     width: 32px;
     height: 32px;
-    border-radius: 8px; /* Sedikit kotak agar lebih rapi */
+    border-radius: 8px;
 }
 
 /* Detail Page */
+.detail-header-container {
+    /* Wrapper untuk header dan tombol kembali */
+    padding: 1rem 1rem 0 1rem;
+    margin-bottom: 1rem;
+}
+
 .detail-header {
     display: flex;
     gap: 1.5rem;
-    padding: 1rem;
-    margin-bottom: 2rem;
+    margin-top: 1rem; /* Jarak dari tombol kembali */
 }
 
 .detail-header img {
@@ -648,11 +705,6 @@ body {
     color: var(--text-secondary);
     margin-bottom: 1.5rem;
     font-size: 0.9rem;
-}
-
-/* Menghapus style untuk .subscribe-btn */
-.subscribe-btn {
-    display: none;
 }
 
 .episode-list {
@@ -705,6 +757,8 @@ body {
     cursor: pointer;
     transition: all 0.3s ease;
     border: 1px solid var(--border-color);
+    /* Memastikan tombol kembali tidak terlalu lebar */
+    flex-shrink: 0;
 }
 
 .back-btn:hover {
@@ -724,6 +778,10 @@ body {
     font-size: 1.25rem;
     font-weight: 700;
     margin: 0;
+    /* Mencegah teks terlalu panjang */
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .video-container {
@@ -824,7 +882,7 @@ body {
     left: 0;
     right: 0;
     display: flex;
-    background: rgba(255, 255, 255, 0.9); /* Latar belakang putih transparan */
+    background: rgba(255, 255, 255, 0.9);
     backdrop-filter: blur(20px);
     border-top: 1px solid var(--border-color);
     z-index: 100;
@@ -835,7 +893,7 @@ body {
     flex: 1;
     background: none;
     border: none;
-    color: var(--text-secondary); /* Warna ikon non-aktif */
+    color: var(--text-secondary);
     padding: 0.75rem 0.5rem;
     display: flex;
     flex-direction: column;
@@ -846,7 +904,7 @@ body {
 }
 
 .nav-button.active {
-    color: var(--accent-primary); /* Warna ikon aktif (Emas) */
+    color: var(--accent-primary);
 }
 
 .nav-button svg {
@@ -875,10 +933,25 @@ body {
     padding: 0 1rem;
 }
 
+/* Judul halaman detail yang digunakan bersama tombol kembali */
+.page-title-header {
+    flex: 1;
+    font-family: var(--font-title);
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin: 0;
+    padding-left: 1rem;
+    background: var(--accent-gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+
 .error-message {
     text-align: center;
     padding: 2rem 1rem;
-    color: var(--accent-secondary); /* Merah Tua */
+    color: var(--accent-secondary);
     background: rgba(139, 0, 0, 0.05);
     border-radius: var(--border-radius);
     margin: 1rem;
@@ -894,6 +967,7 @@ body {
     .detail-header {
         flex-direction: column;
         text-align: center;
+        margin-top: 1rem;
     }
     
     .detail-header img {
@@ -930,10 +1004,15 @@ body {
     }
     
     .slider-wrapper {
-        border-radius: 0;
-        box-shadow: none;
-        border-top: 1px solid var(--border-color);
-        border-bottom: 1px solid var(--border-color);
+        border-radius: var(--border-radius-large);
+        box-shadow: var(--shadow-small);
+        border-top: none;
+        border-bottom: none;
+    }
+
+    .featured-section {
+        margin: 0 0.5rem 2rem 0.5rem;
+        padding: 1.5rem 0.25rem;
     }
     
     .anime-grid,
@@ -945,7 +1024,7 @@ body {
     .anime-card .title,
     .search-result-info h3,
     .slide-title {
-        font-size: 0.8rem; /* Menyesuaikan ukuran font judul kartu */
+        font-size: 0.8rem;
     }
 
     .detail-info h2 {
@@ -959,4 +1038,5 @@ body {
         scroll-behavior: smooth;
     }
 }
+
 
