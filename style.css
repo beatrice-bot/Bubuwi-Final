@@ -1,11 +1,7 @@
-/* ========================================================= */
-/* VARIABEL TEMA (SIANG & MALAM) */
-/* ========================================================= */
-
 :root {
-    /* TEMA SIANG (DEFAULT) */
+    /* Palet Warna Putih Kerajaan (ASLI ANDA) */
     --bg-primary: #ffffff;
-    --bg-secondary: #fdfdfd;
+    --bg-secondary: #fdfdfd; /* Sedikit lebih gelap dari putih murni */
     --bg-card: #ffffff;
     --text-primary: #2c2c2c;
     --text-secondary: #555555;
@@ -25,41 +21,48 @@
 
     --shadow-small: 0 2px 8px rgba(0, 0, 0, 0.05);
     --shadow-medium: 0 6px 16px rgba(0, 0, 0, 0.07);
-    --shadow-large: 0 10px 30px rgba(0, 0, 0, 0.08);
+    --shadow-large: 0 10px 30px rgba(0, 0, 0, 0.1);
 
-    /* Variabel Tema Waktu (Baru) */
-    --body-bg-color: linear-gradient(180deg, #f0f4f8 0%, #ffffff 100%); /* Latar gradien siang */
-    --particle-color: #d4af37; /* Partikel Emas */
-    --cloud-color: rgba(255, 255, 255, 0.7); /* Awan putih cerah */
-    --symbol-color: #ffc107; /* Warna Matahari */
+    --font-title: 'Playfair Display', serif;
+    --font-body: 'Montserrat', sans-serif;
+
+    /* --- DITAMBAHKAN: Variabel Tema Background --- */
+    /* Ini adalah tema SIANG (default) */
+    --body-bg-color: linear-gradient(180deg, #f0f4f8 0%, #ffffff 100%);
+    --particle-color: var(--accent-primary); /* Emas */
+    --particle-animation: rise 15s infinite linear;
+    --cloud-color: rgba(255, 255, 255, 0.7);
+    --symbol-content: '\f185'; /* Ikon Matahari */
+    --symbol-color: #ffc107;
 }
 
-/* TEMA MALAM (Night Theme) */
-body.night-mode {
-    --bg-primary: #12121e; /* Biru malam gelap */
+/* --- DITAMBAHKAN: Tema Malam (Night Mode) --- */
+/* Ini hanya aktif jika <html> memiliki kelas 'night-mode' */
+html.night-mode {
+    --bg-primary: #12121e;
     --bg-secondary: #1a1a2e;
     --bg-card: #1a1a2e;
     --text-primary: #e0e0ff;
     --text-secondary: #b0b0d0;
     --text-muted: #707090;
-    --accent-primary: #f0e68c; /* Emas Pucat */
-    --accent-secondary: #b33939; /* Merah Malam */
+    --accent-primary: #f0e68c;
+    --accent-secondary: #b33939;
     --border-color: #33334d;
-
+    --accent-gradient: linear-gradient(135deg, var(--accent-secondary), var(--accent-primary));
+    --gold-gradient: linear-gradient(135deg, #f0e68c 0%, #d4af37 100%);
     --shadow-small: 0 2px 8px rgba(0, 0, 0, 0.2);
     --shadow-medium: 0 6px 16px rgba(0, 0, 0, 0.25);
     --shadow-large: 0 10px 30px rgba(0, 0, 0, 0.3);
 
-    /* Variabel Tema Waktu (Baru) */
-    --body-bg-color: linear-gradient(180deg, #0f0c29 0%, #302b63 100%); /* Latar gradien malam */
-    --particle-color: #ffffff; /* Partikel Bintang Putih */
-    --cloud-color: rgba(0, 0, 0, 0.4); /* Awan hitam transparan */
-    --symbol-color: #e0e0ff; /* Warna Bulan */
+    /* Variabel Background Malam */
+    --body-bg-color: linear-gradient(180deg, #0f0c29 0%, #302b63 100%);
+    --particle-color: #ffffff; /* Bintang putih */
+    --particle-animation: rise 15s infinite linear; /* Animasi naik asli */
+    --cloud-color: rgba(0, 0, 0, 0.3);
+    --symbol-content: '\f186'; /* Ikon Bulan */
+    --symbol-color: #e0e0ff;
 }
 
-/* ========================================================= */
-/* GAYA DASAR (Dengan Variabel Tema) */
-/* ========================================================= */
 
 * {
     box-sizing: border-box;
@@ -68,291 +71,107 @@ body.night-mode {
 }
 
 body {
-    background: var(--body-bg-color); /* DIUBAH: Menggunakan variabel latar dinamis */
-    min-height: 100vh;
+    font-family: var(--font-body);
+    /* DIUBAH: Menggunakan variabel untuk background agar bisa ganti tema */
+    background: var(--body-bg-color);
     color: var(--text-primary);
-    font-family: 'Montserrat', sans-serif;
-    transition: background 1s ease-in-out, color 0.5s ease; /* Transisi halus */
-    padding-bottom: 80px; /* Ruang untuk nav-bottom */
-    overflow-x: hidden; /* Mencegah scroll horizontal dari awan/partikel */
+    line-height: 1.6;
+    overflow-x: hidden;
+    padding-bottom: 80px; /* Ruang untuk bottom nav */
+    /* DITAMBAHKAN: Transisi HANYA untuk background */
+    transition: background 1.5s ease;
 }
 
-main {
-    padding: 1rem;
-    max-width: 1200px;
-    margin: 0 auto;
-    /* DIUBAH: Pastikan konten di atas partikel */
-    position: relative;
-    z-index: 100;
-}
-
-img {
-    max-width: 100%;
-    height: auto;
-    display: block;
-}
-
-/* ========================================================= */
-/* EFEK VISUAL BARU (PARTIKEL, AWAN, SIMBOL) */
-/* ========================================================= */
-
+/* Latar Belakang Partikel Emas (ASLI ANDA, SEDIKIT DIMODIFIKASI) */
 #particle-container {
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    pointer-events: none;
+    z-index: -1; /* Di belakang konten */
     overflow: hidden;
-    z-index: 0; /* Di belakang konten */
+    pointer-events: none;
+    /* DITAMBAHKAN: Transisi untuk elemen pseudo */
+    transition: color 1.5s ease;
 }
 
 .particle {
     position: absolute;
-    background-color: var(--particle-color);
+    /* DIUBAH: Menggunakan variabel untuk warna */
+    background: var(--particle-color);
     border-radius: 50%;
-    opacity: 0.7;
-    animation: moveAndFade linear infinite;
-    transition: background-color 1s;
+    opacity: 0.6;
+    /* DIUBAH: Menggunakan variabel untuk animasi */
+    animation: var(--particle-animation);
+    /* DITAMBAHKAN: Transisi untuk warna partikel */
+    transition: background 1.5s ease;
 }
 
-/* Animasi partikel (Emas di siang hari, Bintang diam di malam hari) */
-@keyframes moveAndFade {
+@keyframes rise {
     0% {
-        transform: translateY(0) scale(1);
-        opacity: 0.5;
-    }
-    50% {
-        opacity: 1;
-    }
-    100% {
-        transform: translateY(-100vh) scale(0.5);
-        opacity: 0;
-    }
-}
-
-/* Bintang Jatuh (Hanya untuk Night Mode) */
-body.night-mode .particle.shooting-star {
-    opacity: 0;
-    width: 2px;
-    height: 2px;
-    /* Ekor cahaya bintang jatuh */
-    background: linear-gradient(to right, rgba(255, 255, 255, 0), var(--particle-color));
-    animation: shootingStar 5s linear infinite;
-    transform: rotate(45deg); /* Arah jatuh */
-}
-
-@keyframes shootingStar {
-    0% {
-        transform: translate(0, 0) rotate(45deg);
+        transform: translateY(100vh);
         opacity: 0;
     }
     10% {
-        opacity: 1;
+        opacity: 0.6;
     }
-    20% {
-        transform: translate(100vw, 100vh) rotate(45deg);
-        opacity: 0;
+    90% {
+        opacity: 0.6;
     }
     100% {
+        transform: translateY(-10vh);
         opacity: 0;
     }
 }
 
-/* Simbol Waktu (Matahari/Bulan) dan Awan */
-#time-symbol-container {
-    position: fixed;
-    top: 20px;
-    left: 20px;
-    z-index: 10; /* Di atas partikel, di bawah konten jika perlu */
+
+/* --- SEMUA STYLE ASLI ANDA DI BAWAH INI TIDAK DIUBAH, HANYA DISESUAIKAN DENGAN VARS --- */
+
+/* Loading Animation */
+.loader {
     display: flex;
     flex-direction: column;
-    align-items: center;
-    pointer-events: none;
-}
-
-.time-symbol {
-    font-size: 3rem;
-    color: var(--symbol-color);
-    transition: color 1s, text-shadow 1s;
-    text-shadow: 0 0 15px var(--symbol-color); /* Efek glow */
-    margin-bottom: 10px;
-    line-height: 1;
-    animation: pulseSymbol 5s infinite ease-in-out;
-}
-
-/* Animasi 'napas' untuk matahari/bulan */
-@keyframes pulseSymbol {
-    0%, 100% {
-        transform: scale(1);
-    }
-    50% {
-        transform: scale(1.1);
-    }
-}
-
-/* Awan (Cloud) */
-.cloud {
-    position: absolute;
-    width: 80px;
-    height: 25px;
-    background: var(--cloud-color);
-    border-radius: 20px;
-    box-shadow: 0 0 10px rgba(0,0,0,0.1);
-    transition: background-color 1s;
-    animation: moveCloud 30s linear infinite;
-    z-index: 9;
-}
-
-.cloud:nth-child(2) {
-    width: 100px;
-    height: 35px;
-    border-radius: 30px;
-    top: 50px;
-    left: 20%;
-    animation-duration: 40s;
-    opacity: 0.8;
-}
-
-/* Efek gumpalan awan */
-.cloud::before, .cloud::after {
-    content: '';
-    position: absolute;
-    background: inherit;
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    top: -15px;
-    left: 10px;
-}
-
-.cloud::after {
-    width: 60px;
-    height: 60px;
-    top: -30px;
-    left: 30px;
-}
-
-@keyframes moveCloud {
-    0% { transform: translateX(-200px); } /* Mulai dari luar layar kiri */
-    100% { transform: translateX(100vw); } /* Selesai di luar layar kanan */
-}
-
-
-/* ========================================================= */
-/* KOMPONEN UI ANDA (MENGGUNAKAN VARIABEL) */
-/* (SEBAGIAN BESAR TIDAK DIUBAH, HANYA MEMASTIKAN VARS) */
-/* ========================================================= */
-
-.bottom-nav {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    display: flex;
-    justify-content: space-around;
-    align-items: center;
-    background-color: var(--bg-card);
-    height: 60px;
-    box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.05);
-    border-top: 1px solid var(--border-color);
-    z-index: 1000;
-    transition: background-color 0.5s ease, border-color 0.5s ease;
-}
-
-.nav-button {
-    background: none;
-    border: none;
-    color: var(--text-secondary);
-    font-size: 24px;
-    cursor: pointer;
-    padding: 10px;
-    transition: color 0.3s ease;
-}
-
-.nav-button.active {
-    color: var(--accent-primary);
-    transform: scale(1.1);
-}
-
-.auth-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 2rem;
-    background-color: var(--bg-card);
-    border-radius: var(--border-radius-large);
-    box-shadow: var(--shadow-medium);
-    margin: 2rem auto;
-    max-width: 400px;
-}
-
-.auth-container img {
-    width: 80px;
-    height: 80px;
-    border-radius: 50%;
-    margin-bottom: 1rem;
-    border: 3px solid var(--accent-primary);
-}
-
-.auth-container p {
-    font-size: 1.1rem;
-    color: var(--text-primary);
-    margin-bottom: 1.5rem;
-}
-
-.google-btn, .logout-btn {
-    display: flex;
     align-items: center;
     justify-content: center;
-    background-color: var(--bg-primary);
-    color: var(--text-primary);
-    border: 1px solid var(--border-color);
-    border-radius: var(--border-radius);
-    padding: 10px 20px;
-    font-size: 1rem;
-    font-weight: 500;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    box-shadow: var(--shadow-small);
-}
-
-.google-btn img {
-    width: 20px;
-    height: 20px;
-    margin-right: 10px;
-}
-
-.google-btn:hover {
-    background-color: var(--bg-secondary);
-    box-shadow: var(--shadow-medium);
-}
-
-.logout-btn {
-    background-color: var(--accent-secondary);
-    color: white;
-    border: none;
-}
-
-.logout-btn:hover {
-    opacity: 0.8;
-}
-
-.hero-section {
+    padding: 3rem 1rem;
     text-align: center;
+    color: var(--text-secondary); /* Disesuaikan */
+}
+
+.loader-spinner {
+    width: 40px;
+    height: 40px;
+    border: 3px solid var(--border-color); /* Disesuaikan */
+    border-top: 3px solid var(--accent-primary);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-bottom: 1rem;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Hero Section */
+.hero-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 2rem 1rem;
     margin-bottom: 2rem;
-    padding-top: 2rem; /* Ruang untuk matahari/bulan */
+    position: relative;
 }
 
 .hero-gif-container {
+    position: relative;
     width: 300px;
-    height: 180px;
-    margin: 0 auto 1.5rem auto;
+    height: 200px;
+    margin-bottom: 1.5rem;
     border-radius: var(--border-radius-large);
     overflow: hidden;
-    background-color: var(--bg-secondary);
     box-shadow: var(--shadow-large);
-    border: 4px solid var(--bg-card);
 }
 
 .hero-gif {
@@ -361,405 +180,860 @@ body.night-mode .particle.shooting-star {
     object-fit: cover;
 }
 
+.logo-overlay {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(10px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+/* DITAMBAHKAN: Penyesuaian logo overlay untuk mode malam */
+html.night-mode .logo-overlay {
+    background: rgba(30, 30, 48, 0.7);
+}
+
+.hero-logo {
+    width: 60px;
+    height: 60px;
+    object-fit: contain;
+    border-radius: 50%;
+}
+
 .hero-title {
-    font-family: 'Playfair Display', serif;
+    font-family: var(--font-title);
     font-size: 2.5rem;
     font-weight: 700;
-    color: var(--text-primary);
-    margin-bottom: 0.5rem;
+    background: var(--accent-gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    text-align: center;
+    letter-spacing: 1px;
 }
 
-.hero-subtitle {
-    font-size: 1.1rem;
-    color: var(--text-secondary);
-}
-
-.search-bar {
-    position: relative;
-    margin-bottom: 2rem;
-}
-
-.search-input {
-    width: 100%;
-    padding: 15px 20px 15px 50px; /* Ruang untuk ikon */
-    font-size: 1rem;
+/* Featured Slider (Anime Pilihan) */
+.featured-section {
+    padding: 1.5rem 0.5rem;
+    margin: 0 1rem 2rem 1rem;
+    background: var(--bg-secondary); /* Disesuaikan */
+    border: 1px solid var(--border-color); /* Disesuaikan */
     border-radius: var(--border-radius-large);
-    border: 1px solid var(--border-color);
-    background-color: var(--bg-secondary);
-    color: var(--text-primary);
-    box-shadow: var(--shadow-small);
-    transition: all 0.3s ease;
+    box-shadow: var(--shadow-small); /* Disesuaikan */
+    position: relative;
+    transition: background 0.5s, border-color 0.5s; /* Transisi untuk tema */
 }
 
-.search-input:focus {
-    outline: none;
-    border-color: var(--accent-primary);
-    box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.3);
-}
-
-.search-icon {
+.featured-section::before {
+    content: '★';
     position: absolute;
-    left: 18px;
-    top: 50%;
-    transform: translateY(-50%);
-    font-size: 18px;
-    color: var(--text-muted);
+    top: 1.25rem;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 1.5rem;
+    color: var(--accent-primary);
+    opacity: 0.3;
 }
 
 .section-title {
-    font-family: 'Playfair Display', serif;
+    font-family: var(--font-title);
     font-size: 1.75rem;
     font-weight: 700;
-    color: var(--text-primary);
     margin-bottom: 1.5rem;
-    padding-bottom: 0.5rem;
-    border-bottom: 2px solid var(--accent-primary);
-    display: inline-block;
+    margin-top: 1.5rem;
+    text-align: center;
+    background: var(--accent-gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
 }
 
-.anime-grid, .search-results-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-    gap: 1rem;
+.slider-container {
+    position: relative;
+    max-width: 600px;
+    margin: 0 auto;
 }
 
-.anime-card {
-    background-color: var(--bg-card);
-    border-radius: var(--border-radius);
-    box-shadow: var(--shadow-medium);
+.slider-wrapper {
     overflow: hidden;
-    text-decoration: none;
-    color: var(--text-primary);
-    transition: all 0.3s ease;
+    border-radius: var(--border-radius-large);
+    box-shadow: none; 
+}
+
+.slider-track {
     display: flex;
-    flex-direction: column;
+    transition: transform 0.5s ease;
 }
 
-.anime-card:hover {
-    transform: translateY(-5px);
-    box-shadow: var(--shadow-large);
+.slide-card {
+    min-width: 100%;
+    position: relative;
+    cursor: pointer;
+    background: var(--bg-secondary); /* Disesuaikan */
 }
 
-.anime-card-img-container {
+.slide-image {
     position: relative;
     width: 100%;
-    padding-top: 140%; /* Rasio aspek gambar */
-    background-color: var(--bg-secondary);
+    height: 300px;
+    overflow: hidden;
 }
 
-.anime-card-img {
-    position: absolute;
-    top: 0;
-    left: 0;
+.slide-card img {
     width: 100%;
     height: 100%;
     object-fit: cover;
+    transition: transform 0.3s ease;
 }
 
-.anime-card-badge {
+.slide-card:hover img {
+    transform: scale(1.05);
+}
+
+.slide-episode-badge {
     position: absolute;
-    top: 8px;
-    left: 8px;
-    background: var(--gold-gradient);
-    color: var(--text-primary);
-    font-size: 0.75rem;
+    top: 1rem;
+    left: 1rem;
+    background: var(--accent-gradient);
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: var(--border-radius);
+    font-size: 0.875rem;
     font-weight: 600;
-    padding: 4px 8px;
-    border-radius: 6px;
+    box-shadow: var(--shadow-small);
 }
 
-.anime-card-info {
-    padding: 0.75rem;
-    flex-grow: 1;
+.slide-content {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.8), transparent);
+    padding: 2rem 1.5rem 1.5rem;
 }
 
-.anime-card-title {
-    font-size: 0.9rem;
-    font-weight: 600;
-    margin-bottom: 0.25rem;
-    /* Truncate text */
+.slide-title {
+    font-family: var(--font-title);
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: white;
+    margin: 0;
+    line-height: 1.3;
     display: -webkit-box;
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
     overflow: hidden;
     text-overflow: ellipsis;
-    min-height: 2.7em; /* Ruang untuk 2 baris */
 }
 
-/* Featured Slider */
-.featured-section {
+.slider-dots {
+    display: flex;
+    justify-content: center;
+    gap: 0.75rem;
+    margin-top: 1.5rem;
+}
+
+.slider-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--border-color); /* Disesuaikan */
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.slider-dot.active {
+    background: var(--accent-primary);
+    transform: scale(1.2);
+}
+
+/* Search Section */
+.search-section {
+    padding: 0 1rem;
+    margin-bottom: 3rem;
+}
+
+.search-container {
+    position: relative;
+    max-width: 500px;
+    margin: 0 auto 1rem auto;
+}
+
+#main-search-form {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+#main-search-input {
+    width: 100%;
+    padding: 1rem 1.5rem;
+    padding-right: 4rem;
+    font-size: 1rem;
+    font-family: var(--font-body);
+    border: 1px solid var(--border-color); /* Disesuaikan */
+    border-radius: var(--border-radius-large);
+    background: var(--bg-secondary); /* Disesuaikan */
+    color: var(--text-primary); /* Disesuaikan */
+    transition: all 0.3s ease;
+}
+
+#main-search-input:focus {
+    outline: none;
+    border-color: var(--accent-primary);
+    box-shadow: 0 0 0 4px rgba(212, 175, 55, 0.1);
+}
+html.night-mode #main-search-input:focus {
+    box-shadow: 0 0 0 4px rgba(240, 230, 140, 0.1);
+}
+
+.search-btn {
+    position: absolute;
+    right: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 40px;
+    height: 40px;
+    border: none;
+    border-radius: 50%;
+    background: var(--accent-gradient);
+    color: white;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+}
+
+.search-btn:hover {
+    transform: translateY(-50%) scale(1.1);
+    box-shadow: var(--shadow-medium);
+}
+
+.search-btn svg {
+    width: 20px;
+    height: 20px;
+    fill: currentColor;
+}
+
+/* Search Results Page */
+.search-page {
+    padding: 1rem;
+}
+
+.search-results-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 1rem;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.search-result-card {
+    background: var(--bg-card); /* Disesuaikan */
+    border-radius: var(--border-radius);
+    overflow: hidden;
+    text-decoration: none;
+    color: var(--text-primary); /* Disesuaikan */
+    transition: all 0.3s ease;
+    border: 1px solid var(--border-color); /* Disesuaikan */
+    position: relative;
+    box-shadow: var(--shadow-small); /* Disesuaikan */
+}
+
+.search-result-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-medium);
+}
+
+.search-result-card img {
+    width: 100%;
+    aspect-ratio: 2 / 3;
+    object-fit: cover;
+}
+
+.search-result-info {
+    padding: 1rem;
+}
+
+.search-result-info h3 {
+    font-family: var(--font-body);
+    font-size: 0.9rem;
+    font-weight: 600;
+    margin: 0;
+    line-height: 1.3;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Latest Section */
+.latest-section {
+    padding: 0 1rem;
     margin-bottom: 2rem;
 }
 
-.slider-wrapper {
+.anime-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 1rem;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.anime-card {
     position: relative;
+    border-radius: var(--border-radius);
     overflow: hidden;
-    border-radius: var(--border-radius-large);
-    box-shadow: var(--shadow-large);
-    border-top: 5px solid;
-    border-bottom: 5px solid;
-    border-image: var(--gold-gradient) 1;
-}
-
-.slider-container {
-    display: flex;
-    transition: transform 0.5s ease-in-out;
-}
-
-.slider-item {
-    min-width: 100%;
-    position: relative;
     text-decoration: none;
+    color: var(--text-primary); /* Disesuaikan */
+    background: var(--bg-card); /* Disesuaikan */
+    border: 1px solid var(--border-color); /* Disesuaikan */
+    box-shadow: var(--shadow-small); /* Disesuaikan */
+    opacity: 0;
+    transform: translateY(30px);
+    transition: opacity 0.6s ease-out, transform 0.6s ease-out, background 0.5s, border-color 0.5s;
 }
 
-.slider-img {
+.anime-card.is-visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.anime-card:hover {
+    transform: translateY(-8px);
+    box-shadow: var(--shadow-medium); /* Disesuaikan */
+}
+
+.anime-card.is-visible:hover {
+    transform: translateY(-8px);
+}
+
+.anime-card img {
     width: 100%;
-    height: 200px;
+    aspect-ratio: 2 / 3;
     object-fit: cover;
     display: block;
 }
 
-.slider-caption {
+.anime-card .title {
     position: absolute;
     bottom: 0;
     left: 0;
     right: 0;
-    background: linear-gradient(to top, rgba(0,0,0,0.8), rgba(0,0,0,0));
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.8), transparent);
+    padding: 1.5rem 0.75rem 0.75rem;
+    font-size: 0.9rem;
+    font-weight: 600;
+    line-height: 1.3;
     color: white;
-    padding: 1.5rem 1rem 1rem 1rem;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
-.slider-title {
-    font-family: 'Playfair Display', serif;
-    font-size: 1.25rem;
-    font-weight: 700;
-    margin-bottom: 0.25rem;
-}
-
-.slider-dots {
+.episode-badge {
     position: absolute;
-    bottom: 10px;
-    left: 50%;
-    transform: translateX(-50%);
-    display: flex;
+    top: 0.75rem;
+    left: 0.75rem;
+    background: var(--accent-gradient);
+    color: white;
+    padding: 0.25rem 0.75rem;
+    border-radius: var(--border-radius);
+    font-size: 0.75rem;
+    font-weight: 600;
+    box-shadow: var(--shadow-small);
+    z-index: 2;
 }
 
-.slider-dot {
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    background-color: rgba(255, 255, 255, 0.5);
-    margin: 0 4px;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
+.empty-state {
+    text-align: center;
+    padding: 3rem 1rem;
+    color: var(--text-secondary); /* Disesuaikan */
+    grid-column: 1 / -1;
 }
 
-.slider-dot.active {
-    background-color: white;
+/* Account Page */
+.account-section {
+    padding: 0 1rem;
+    margin-bottom: 2rem;
 }
 
-/* Halaman Detail */
-.detail-container {
-    padding: 1.5rem;
-    background-color: var(--bg-card);
+.user-profile {
+    background: var(--bg-card); /* Disesuaikan */
     border-radius: var(--border-radius-large);
-    box-shadow: var(--shadow-medium);
+    padding: 2rem;
+    border: 1px solid var(--border-color); /* Disesuaikan */
+    text-align: center;
+    margin-bottom: 2rem;
+    box-shadow: var(--shadow-medium); /* Disesuaikan */
+    transition: background 0.5s, border-color 0.5s;
 }
 
-.back-button {
-    background: none;
-    border: none;
-    color: var(--text-secondary);
-    font-size: 1rem;
-    font-weight: 500;
-    cursor: pointer;
+.profile-picture {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    border: 3px solid transparent;
+    background: var(--gold-gradient);
+    padding: 3px;
+    margin: 0 auto 1rem auto;
+    display: block;
+}
+
+.profile-picture img {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.user-info h3 {
+    font-family: var(--font-title);
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    color: var(--text-primary); /* Disesuaikan */
+}
+
+.user-info p {
+    color: var(--text-secondary); /* Disesuaikan */
+    margin-bottom: 1.5rem;
+}
+
+.google-login-btn {
     display: flex;
     align-items: center;
-    margin-bottom: 1rem;
+    justify-content: center;
+    gap: 0.75rem;
+    width: 100%;
+    max-width: 300px;
+    margin: 0 auto;
+    padding: 1rem 1.5rem;
+    border: 1px solid var(--border-color); /* Disesuaikan */
+    border-radius: var(--border-radius-large);
+    background: var(--bg-primary); /* Disesuaikan */
+    color: var(--text-primary); /* Disesuaikan */
+    font-size: 1rem;
+    font-weight: 600;
+    font-family: var(--font-body);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: var(--shadow-small); /* Disesuaikan */
 }
 
-.back-button i {
-    margin-right: 0.5rem;
+.google-login-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-medium); /* Disesuaikan */
+}
+
+.google-login-btn svg {
+    width: 24px;
+    height: 24px;
+}
+
+.auth-btn {
+    padding: 0.75rem 2rem;
+    border: none;
+    border-radius: var(--border-radius);
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-family: var(--font-body);
+}
+
+.logout-btn {
+    background: var(--accent-secondary);
+    color: white;
+}
+
+.logout-btn:hover {
+    background: #a50000;
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-small);
+}
+html.night-mode .logout-btn:hover {
+    background: #c94a4a;
+}
+
+.contact-container {
+    padding: 0 1rem;
+    text-align: center;
+}
+
+.contact-title {
+    font-family: var(--font-title);
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: 1.5rem;
+    color: var(--text-primary); /* Disesuaikan */
+}
+
+.contact-page-logo {
+    width: 80px;
+    height: 80px;
+    margin: 0 auto 2rem auto;
+    border-radius: 50%;
+    border: 2px solid transparent;
+    background: var(--gold-gradient);
+    padding: 2px;
+}
+
+.contact-page-logo img {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    object-fit: contain;
+}
+
+.contact-link {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem 1.5rem;
+    border-radius: var(--border-radius);
+    text-decoration: none;
+    color: var(--text-primary); /* Disesuaikan */
+    background: var(--bg-secondary); /* Disesuaikan */
+    margin-bottom: 1rem;
+    border: 1px solid var(--border-color); /* Disesuaikan */
+    transition: all 0.3s ease;
+}
+
+.contact-link:hover {
+    background: #f1f1f1;
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-small);
+}
+html.night-mode .contact-link:hover {
+    background: var(--bg-primary);
+}
+
+
+.contact-link img {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+}
+
+/* Detail Page */
+.detail-header-container {
+    padding: 1rem 1rem 0 1rem;
+    margin-bottom: 1rem;
 }
 
 .detail-header {
     display: flex;
-    align-items: flex-start;
     gap: 1.5rem;
-    margin-bottom: 1.5rem;
+    margin-top: 1rem;
 }
 
-.detail-img {
-    width: 180px;
-    height: 250px;
-    object-fit: cover;
+.detail-header img {
+    width: 120px;
     border-radius: var(--border-radius);
-    box-shadow: var(--shadow-medium);
-    flex-shrink: 0;
+    border: 1px solid var(--border-color); /* Disesuaikan */
+    box-shadow: var(--shadow-medium); /* Disesuaikan */
 }
 
 .detail-info {
-    flex-grow: 1;
+    flex: 1;
 }
 
-.detail-title {
-    font-family: 'Playfair Display', serif;
-    font-size: 2rem;
+.detail-info h2 {
+    font-family: var(--font-title);
+    font-size: 1.7rem;
     font-weight: 700;
-    color: var(--text-primary);
-    margin-bottom: 0.75rem;
+    margin-bottom: 0.5rem;
+    color: var(--text-primary); /* Disesuaikan */
 }
 
-.detail-meta {
-    font-size: 0.9rem;
-    color: var(--text-secondary);
-    margin-bottom: 1rem;
-}
-
-.detail-meta span {
-    margin-right: 1rem;
-}
-
-.detail-synopsis {
-    font-size: 1rem;
-    color: var(--text-secondary);
-    line-height: 1.6;
+.detail-info p {
+    color: var(--text-secondary); /* Disesuaikan */
     margin-bottom: 1.5rem;
+    font-size: 0.9rem;
 }
 
 .episode-list {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
-    gap: 0.5rem;
+    padding: 0 1rem;
 }
 
-.episode-button {
-    background-color: var(--bg-secondary);
-    border: 1px solid var(--border-color);
-    color: var(--text-primary);
+.episode-card {
+    background: var(--bg-card); /* Disesuaikan */
+    padding: 1.25rem;
     border-radius: var(--border-radius);
-    padding: 10px;
-    font-size: 0.9rem;
-    font-weight: 500;
-    cursor: pointer;
+    margin-bottom: 0.75rem;
+    text-decoration: none;
+    color: var(--text-primary); /* Disesuaikan */
+    display: block;
+    border: 1px solid var(--border-color); /* Disesuaikan */
     transition: all 0.3s ease;
-    text-align: center;
+    box-shadow: var(--shadow-small); /* Disesuaikan */
 }
 
-.episode-button:hover {
-    background-color: var(--accent-primary);
-    color: white;
+.episode-card:hover {
+    background: var(--bg-secondary); /* Disesuaikan */
+    transform: translateY(-2px);
     border-color: var(--accent-primary);
 }
 
-/* Halaman Nonton */
-.player-container {
-    background-color: var(--bg-card);
-    border-radius: var(--border-radius-large);
-    box-shadow: var(--shadow-medium);
-    overflow: hidden;
+.episode-card h3 {
+    font-size: 1rem;
+    font-weight: 500;
+    margin: 0;
 }
 
-.video-wrapper {
-    position: relative;
-    padding-top: 56.25%; /* 16:9 Aspect Ratio */
-    background-color: #000;
+/* Watch Page */
+.watch-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem;
+    margin-bottom: 1rem;
 }
 
-.video-player {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
+.back-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    border: none;
+    border-radius: var(--border-radius);
+    background: var(--bg-secondary); /* Disesuaikan */
+    color: var(--text-primary); /* Disesuaikan */
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: 1px solid var(--border-color); /* Disesuaikan */
+    flex-shrink: 0;
 }
 
-.video-info {
-    padding: 1rem 1.5rem;
+.back-btn:hover {
+    background: #f1f1f1;
+    box-shadow: var(--shadow-small);
+}
+html.night-mode .back-btn:hover {
+    background: var(--bg-primary);
 }
 
-.video-title {
-    font-family: 'Playfair Display', serif;
-    font-size: 1.5rem;
+.back-btn svg {
+    width: 20px;
+    height: 20px;
+    fill: currentColor;
+}
+
+.episode-title {
+    flex: 1;
+    font-family: var(--font-title);
+    font-size: 1.25rem;
     font-weight: 700;
-    color: var(--text-primary);
-    margin-bottom: 0.5rem;
+    margin: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    color: var(--text-primary); /* Disesuaikan */
+}
+
+.video-container {
+    padding: 0 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.video-container iframe {
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    border: none;
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-large); /* Disesuaikan */
 }
 
 .episode-controls {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-top: 1rem;
-    padding-top: 1rem;
-    border-top: 1px solid var(--border-color);
+    gap: 1rem;
+    padding: 0 1rem;
+    margin-bottom: 2rem;
+    max-width: 400px;
+    margin-left: auto;
+    margin-right: auto;
 }
 
 .episode-nav-btn {
     display: flex;
     align-items: center;
-    background-color: var(--bg-secondary);
-    color: var(--text-primary);
-    border: 1px solid var(--border-color);
+    gap: 0.5rem;
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: var(--border-radius-large);
+    background: var(--accent-gradient);
+    color: white;
+    font-weight: 600;
+    font-family: var(--font-body);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    flex: 1;
+    justify-content: center;
+}
+
+.episode-nav-btn:hover:not(.disabled) {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-medium);
+}
+
+.episode-nav-btn.disabled {
+    background: var(--text-muted);
+    cursor: not-allowed;
+    opacity: 0.7;
+}
+
+.episode-nav-btn svg {
+    width: 20px;
+    height: 20px;
+    fill: currentColor;
+}
+
+.episode-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(50px, 1fr));
+    gap: 0.75rem;
+    padding: 0 1rem;
+    margin-bottom: 2rem;
+}
+
+.episode-grid-item {
+    aspect-ratio: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--bg-secondary); /* Disesuaikan */
     border-radius: var(--border-radius);
-    padding: 10px 15px;
-    font-size: 0.9rem;
-    font-weight: 500;
+    border: 1px solid var(--border-color); /* Disesuaikan */
+    color: var(--text-primary); /* Disesuaikan */
+    font-weight: 600;
     cursor: pointer;
     transition: all 0.3s ease;
 }
 
-.episode-nav-btn:hover {
-    background-color: var(--bg-primary);
-    box-shadow: var(--shadow-small);
+.episode-grid-item:hover {
+    background: #f1f1f1;
+    transform: translateY(-2px);
+}
+html.night-mode .episode-grid-item:hover {
+    background: var(--bg-primary);
 }
 
-.episode-nav-btn:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
+.episode-grid-item.active {
+    background: var(--accent-primary);
+    color: white;
+    border-color: var(--accent-primary);
 }
 
-.episode-nav-btn i {
-    font-size: 0.8rem;
-}
-
-.episode-nav-btn.prev i { margin-right: 0.5rem; }
-.episode-nav-btn.next i { margin-left: 0.5rem; }
-
-/* Loader */
-.loader-container {
+/* Bottom Navigation */
+.bottom-nav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
     display: flex;
-    justify-content: center;
+    background: var(--bg-card); /* Disesuaikan */
+    border-top: 1px solid var(--border-color); /* Disesuaikan */
+    z-index: 100;
+    padding: 0.5rem 0;
+    transition: background 0.5s, border-color 0.5s; /* Transisi untuk tema */
+}
+/* DITAMBAHKAN: Efek blur untuk nav di mode SIANG */
+html:not(.night-mode) .bottom-nav {
+    background: rgba(255, 255, 255, 0.9);
+    backdrop-filter: blur(20px);
+}
+/* DITAMBAHKAN: Efek blur untuk nav di mode MALAM */
+html.night-mode .bottom-nav {
+    background: rgba(30, 30, 48, 0.9); /* bg-card malam dengan transparansi */
+    backdrop-filter: blur(20px);
+}
+
+.nav-button {
+    flex: 1;
+    background: none;
+    border: none;
+    color: var(--text-secondary); /* Disesuaikan */
+    padding: 0.75rem 0.5rem;
+    display: flex;
+    flex-direction: column;
     align-items: center;
-    height: 60vh;
+    gap: 0.25rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
 }
 
-.loader {
-    width: 50px;
-    height: 50px;
-    border: 5px solid var(--border-color);
-    border-top-color: var(--accent-primary);
-    border-radius: 50%;
-    animation: spin 1s linear infinite;
+.nav-button.active {
+    color: var(--accent-primary);
 }
 
-@keyframes spin {
-    to { transform: rotate(360deg); }
+.nav-button svg {
+    width: 24px;
+    height: 24px;
+    fill: currentColor;
 }
 
-/* Empty State */
-.empty-state {
+.nav-button span {
+    font-size: 0.75rem;
+    font-weight: 500;
+    font-family: var(--font-body);
+}
+
+/* Utilities */
+.page-title {
+    font-family: var(--font-title);
+    font-size: 2rem;
+    font-weight: 700;
+    margin-bottom: 2rem;
     text-align: center;
-    padding: 3rem;
-    color: var(--text-muted);
+    background: var(--accent-gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    padding: 0 1rem;
 }
 
-.empty-state i {
-    font-size: 3rem;
-    margin-bottom: 1rem;
+.page-title-header {
+    flex: 1;
+    font-family: var(--font-title);
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin: 0;
+    padding-left: 1rem;
+    background: var(--accent-gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
 }
 
-/* Responsive Design (Tidak Diubah) */
+.error-message {
+    text-align: center;
+    padding: 2rem 1rem;
+    color: var(--accent-secondary);
+    background: rgba(139, 0, 0, 0.05);
+    border-radius: var(--border-radius);
+    margin: 1rem;
+    border: 1px solid rgba(139, 0, 0, 0.1);
+}
+html.night-mode .error-message {
+    color: #ff8a8a;
+    background: rgba(255, 138, 138, 0.05);
+    border: 1px solid rgba(255, 138, 138, 0.1);
+}
+
+/* Responsive Design (ASLI ANDA, TIDAK DIUBAH) */
 @media (max-width: 768px) {
     .hero-title {
         font-size: 2rem;
@@ -791,12 +1065,6 @@ body.night-mode .particle.shooting-star {
     .episode-nav-btn {
         width: auto;
         flex: 1;
-        font-size: 0.8rem;
-        padding: 8px 10px;
-    }
-
-    .time-symbol {
-        font-size: 2.5rem;
     }
 }
 
@@ -818,32 +1086,131 @@ body.night-mode .particle.shooting-star {
     }
 
     .featured-section {
-        margin: 0 0.5rem 1.5rem 0.5rem;
+        margin: 0 0.5rem 2rem 0.5rem;
+        padding: 1.5rem 0.25rem;
     }
-
+    
     .anime-grid,
     .search-results-grid {
-        grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+        grid-template-columns: repeat(3, 1fr);
         gap: 0.5rem;
     }
-    
-    .anime-card-title {
+
+    .anime-card .title,
+    .search-result-info h3,
+    .slide-title {
         font-size: 0.8rem;
-        min-height: 2.4em;
-    }
-    
-    .detail-title {
-        font-size: 1.5rem;
     }
 
-    .detail-img {
-        width: 120px;
-        height: 180px;
+    .detail-info h2 {
+        font-size: 1.4rem;
     }
+}
 
-    .episode-list {
-        grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+@media (prefers-reduced-motion: no-preference) {
+    * {
+        scroll-behavior: smooth;
     }
+}
+
+/* --- DITAMBAHKAN: Efek Bintang Jatuh, Matahari, Bulan, Awan (HANYA CSS) --- */
+
+/* Bintang Jatuh (Hanya Malam) */
+/* Ini akan mengubah animasi untuk 5 partikel terakhir (dari 40) */
+html.night-mode .particle:nth-child(n+35) {
+    width: 2px;
+    height: 2px;
+    background: linear-gradient(to right, rgba(255, 255, 255, 0), var(--particle-color));
+    transform: rotate(45deg);
+    animation: shootingStar 7s linear infinite;
+    opacity: 0;
+}
+
+@keyframes shootingStar {
+    0% {
+        transform: translate(0, 0) rotate(45deg);
+        opacity: 0;
+    }
+    10% { opacity: 1; }
+    20% {
+        transform: translate(100vw, 100vh) rotate(45deg);
+        opacity: 0;
+    }
+    100% { opacity: 0; }
+}
+
+/* Matahari / Bulan (menggunakan pseudo-elemen dari particle-container) */
+#particle-container::before {
+    content: var(--symbol-content); /* Mengambil ikon \f185 atau \f186 */
+    font-family: "Font Awesome 6 Free";
+    font-weight: 900;
+    font-size: 3rem;
+    color: var(--symbol-color);
+    text-shadow: 0 0 15px var(--symbol-color);
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    z-index: -1;
+    transition: color 1.5s ease, text-shadow 1.5s ease;
+    animation: pulseSymbol 5s infinite ease-in-out;
+}
+
+@keyframes pulseSymbol {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+}
+
+/* Awan (menggunakan pseudo-elemen dari particle-container) */
+#particle-container::after {
+    content: '';
+    position: fixed;
+    top: 50px;
+    left: 0;
+    width: 200px;
+    height: 60px;
+    background: var(--cloud-color);
+    border-radius: 30px;
+    z-index: -2;
+    transition: background 1.5s ease;
+    animation: moveCloud 40s linear infinite alternate;
+    box-shadow: 0 0 20px rgba(0,0,0,0.1);
+}
+
+/* Gumpalan awan tambahan */
+.cloud-extra {
+    position: fixed;
+    top: 30px;
+    left: 0;
+    width: 150px;
+    height: 40px;
+    background: var(--cloud-color);
+    border-radius: 20px;
+    z-index: -2;
+    transition: background 1.5s ease;
+    animation: moveCloud 30s linear infinite alternate-reverse;
+    opacity: 0.7;
+}
+
+@keyframes moveCloud {
+    0% { transform: translateX(-150px); }
+    100% { transform: translateX(100vw); }
+}
+
+/* Menambahkan elemen awan ke body (Hanya CSS) */
+body::before {
+    content: '';
+    display: block;
+    position: fixed;
+    top: 30px;
+    left: 0;
+    width: 150px;
+    height: 40px;
+    background: var(--cloud-color);
+    border-radius: 20px;
+    z-index: -2;
+    transition: background 1.5s ease;
+    animation: moveCloud 30s linear infinite alternate-reverse;
+    opacity: 0.7;
 }
 
 
