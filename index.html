@@ -10,10 +10,21 @@
     <link rel="stylesheet" href="style.css">
     <link rel="manifest" href="manifest.json">
     <link rel="apple-touch-icon" href="https://i.imgur.com/9uK2OPw.png">
-    <meta name="theme-color" content="#ffffff">
+    <meta name="theme-color" content="#ffffff"> <!-- Akan di-update oleh JS nanti -->
 </head>
 <body>
-    <!-- Kontainer untuk partikel emas -->
+    <!-- 
+      Kontainer Visual Tema Waktu (Baru)
+      Ini untuk menampung matahari, bulan, dan awan.
+    -->
+    <div id="time-theme-visuals">
+        <div class="cloud cloud-1"></div>
+        <div class="cloud cloud-2"></div>
+        <div class="sun"></div>
+        <div class="moon"></div>
+    </div>
+
+    <!-- Kontainer untuk partikel (Tetap) -->
     <div id="particle-container"></div>
 
     <main id="app-content"></main>
@@ -50,5 +61,4 @@
     </script>
 </body>
 </html>
-
 
