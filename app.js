@@ -108,7 +108,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         <img src="https://i.imgur.com/9uK2OPw.png" alt="Bubuwi Logo" class="hero-logo">
                     </div>
                 </div>
-                <h1 class="hero-title">Bubuwi-V3</h1>
+                <h1 class="hero-title">Bubuwi</h1>
             </div>
             
             <div class="featured-section">
