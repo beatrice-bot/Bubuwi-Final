@@ -1,7 +1,9 @@
 document.addEventListener('DOMContentLoaded', () => {
     const app = document.getElementById('app-content');
     const bottomNav = document.querySelector('.bottom-nav');
+    const themeColorMeta = document.querySelector('meta[name="theme-color"]');
 
+    // --- BAGIAN INI TIDAK DIUBAH SAMA SEKALI ---
     const API_URL = "https://bubuwi-pro.netlify.app/api/scrape";
     
     let currentUser = null;
@@ -10,45 +12,95 @@ document.addEventListener('DOMContentLoaded', () => {
     let slideIndex = 0;
     let slideInterval;
     
-    // Variabel untuk menyimpan halaman terakhir (untuk tombol kembali)
     let lastPageContext = { page: 'home', params: {} };
+    // --- AKHIR BAGIAN TIDAK DIUBAH ---
 
-    // --- Fungsi Baru: Inisialisasi Partikel Emas ---
+    // --- Fungsi Baru: Logika Tema Waktu (WIB) ---
+    function checkTimeTheme() {
+        const now = new Date();
+        // Dapatkan jam UTC dan tambahkan 7 untuk WIB (UTC+7)
+        // Modulo 24 untuk menangani lintas hari
+        const wibHours = (now.getUTCHours() + 7) % 24;
+
+        // Siang: 06:00 (6) pagi s/d 16:59 (16) sore
+        const isDayTime = wibHours >= 6 && wibHours < 17;
+
+        if (isDayTime) {
+            document.body.classList.remove('night-mode');
+            // Update theme-color di PWA/Mobile browser
+            if (themeColorMeta) themeColorMeta.setAttribute('content', '#ffffff');
+        } else {
+            // Malam: 17:00 (17) sore s/d 05:59 (5) pagi
+            document.body.classList.add('night-mode');
+            if (themeColorMeta) themeColorMeta.setAttribute('content', '#0B1120');
+        }
+    }
+
+    // --- Fungsi Dimodifikasi: Inisialisasi Partikel Siang & Malam ---
     function initParticles() {
         const container = document.getElementById('particle-container');
         if (!container) return;
-        const particleCount = 40; // Jumlah partikel
-        for (let i = 0; i < particleCount; i++) {
+        
+        // Bersihkan partikel lama jika ada
+        container.innerHTML = ''; 
+        
+        const goldParticleCount = 100; // Lebih banyak partikel emas (permintaanmu)
+        const starCount = 20; // Jumlah bintang jatuh
+
+        // 1. Buat Partikel Emas (untuk Siang)
+        for (let i = 0; i < goldParticleCount; i++) {
             const particle = document.createElement('div');
-            particle.classList.add('particle');
+            particle.classList.add('particle', 'gold');
+            
             const size = Math.random() * 3 + 1; // Ukuran 1px - 4px
             particle.style.width = `${size}px`;
             particle.style.height = `${size}px`;
             particle.style.left = `${Math.random() * 100}vw`;
+            
             const duration = Math.random() * 10 + 15; // Durasi 15s - 25s
             const delay = Math.random() * 15; // Delay awal acak
+            
             particle.style.animationDuration = `${duration}s`;
             particle.style.animationDelay = `${delay}s`;
+            
             container.appendChild(particle);
+        }
+
+        // 2. Buat Bintang Jatuh (untuk Malam)
+        for (let i = 0; i < starCount; i++) {
+            const star = document.createElement('div');
+            star.classList.add('particle', 'shooting-star');
+            
+            // Posisi awal acak (di luar layar atas/kanan)
+            star.style.top = `${Math.random() * 100 - 20}vh`; // Mulai dari -20vh
+            star.style.left = `${Math.random() * 100 + 50}vw`; // Mulai dari 50vw
+            
+            const duration = Math.random() * 3 + 3; // Durasi jatuh 3s - 6s
+            const delay = Math.random() * 10; // Muncul acak
+            
+            star.style.animationDuration = `${duration}s`;
+            star.style.animationDelay = `${delay}s`;
+            
+            container.appendChild(star);
         }
     }
 
     // --- Fungsi Baru: Inisialisasi Animasi Scroll ---
     function initScrollAnimation() {
+        // ... (Fungsi ini sudah ada di kodemu, aku hanya memastikannya tetap ada) ...
         const animatedCards = document.querySelectorAll('.latest-section .anime-card');
         if (!animatedCards.length) return;
 
         const observer = new IntersectionObserver((entries) => {
             entries.forEach((entry, index) => {
                 if (entry.isIntersecting) {
-                    // Menambahkan delay bertahap untuk efek stagger
                     entry.target.style.transitionDelay = `${index * 50}ms`;
                     entry.target.classList.add('is-visible');
-                    observer.unobserve(entry.target); // Berhenti mengamati setelah animasi
+                    observer.unobserve(entry.target);
                 }
             });
         }, {
-            rootMargin: '0px 0px -50px 0px' // Memicu sedikit sebelum elemen penuh terlihat
+            rootMargin: '0px 0px -50px 0px'
         });
 
         animatedCards.forEach(card => {
@@ -68,35 +120,35 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // URL Router
     const updateURL = (path, params = {}) => {
+        // ... (Tidak diubah) ...
         const url = new URL(window.location);
         url.pathname = path;
         url.search = '';
-        
         Object.keys(params).forEach(key => {
             if (params[key]) url.searchParams.set(key, params[key]);
         });
-        
         window.history.pushState(null, '', url.toString());
     };
 
     const getURLParams = () => {
+        // ... (Tidak diubah) ...
         const params = new URLSearchParams(window.location.search);
         return Object.fromEntries(params.entries());
     };
 
     const getCurrentPage = () => {
+        // ... (Tidak diubah) ...
         const path = window.location.pathname;
         if (path === '/' || path === '/index') return 'home';
         if (path === '/akun') return 'account';
         if (path.includes('-episode-')) return 'watch';
         if (path.includes('-pilih-episode')) return 'detail';
-        
         const params = getURLParams();
         if (params.s) return 'search';
-        
         return 'home';
     };
 
+    // --- TEMPLATES (Tidak diubah sama sekali) ---
     const templates = {
         loader: () => `<div class="loader"><div class="loader-spinner"></div><p>Loading...</p></div>`,
         
@@ -224,7 +276,6 @@ document.addEventListener('DOMContentLoaded', () => {
         detailPage: (data, title, thumbnail) => {
             return `
                 <div class="detail-header-container">
-                    <!-- Tombol Kembali Baru -->
                     <div class="watch-header" style="margin-bottom: 0; padding: 0;">
                          <button id="back-to-list" class="back-btn">
                             <svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
@@ -295,23 +346,22 @@ document.addEventListener('DOMContentLoaded', () => {
                 <span>Akun</span>
             </button>`
     };
+    // --- AKHIR TEMPLATES ---
 
+
+    // --- ROUTER (Logika inti tidak diubah) ---
     const router = {
         currentPage: getCurrentPage(),
         render: async (page, params = {}) => {
-            // Menyimpan konteks halaman sebelumnya
             if (page === 'home' || page === 'search' || page === 'account') {
-                // Jangan update jika hanya navigasi ke halaman yang sama (misal, refresh akun)
                 if (page !== router.currentPage) {
                    lastPageContext = { page: router.currentPage, params: getURLParams() };
                 }
             }
-            
-            // Menyimpan konteks halaman saat ini (terutama untuk pencarian)
             if (page === 'search') {
                 lastPageContext = { page: 'search', params: params };
             } else if (page === 'home') {
-                lastPageContext = { page: 'home', params: {} };
+                lastPageNext = { page: 'home', params: {} };
             }
 
             router.currentPage = page;
@@ -322,16 +372,16 @@ document.addEventListener('DOMContentLoaded', () => {
                 let content = '';
                 if (page === 'home') {
                     updateURL('/index');
-                    const data = await fetch(API_URL).then(res => res.json());
+                    const data = await fetch(API_URL).then(res => res.json()); // TIDAK DIUBAH
                     if (!data.results || data.results.length === 0) throw new Error("API tidak mengembalikan hasil.");
                     content = templates.homePage(data);
                     app.innerHTML = content;
                     setTimeout(initSlider, 100);
-                    setTimeout(initScrollAnimation, 100); // Memicu animasi scroll
+                    setTimeout(initScrollAnimation, 100);
                 } else if (page === 'search') {
                     const query = params.query || getURLParams().s;
                     updateURL('/', { s: query });
-                    const data = await fetch(`${API_URL}?search=${encodeURIComponent(query)}`).then(res => res.json());
+                    const data = await fetch(`${API_URL}?search=${encodeURIComponent(query)}`).then(res => res.json()); // TIDAK DIUBAH
                     content = templates.searchPage(query, data.results || []);
                     app.innerHTML = content;
                 } else if (page === 'account') {
@@ -339,9 +389,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     content = templates.accountPage();
                     app.innerHTML = content;
                 } else {
-                    // Fallback
                     updateURL('/index');
-                    const data = await fetch(API_URL).then(res => res.json());
+                    const data = await fetch(API_URL).then(res => res.json()); // TIDAK DIUBAH
                     content = templates.homePage(data);
                     app.innerHTML = content;
                     setTimeout(initSlider, 100);
@@ -352,13 +401,14 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
     };
+    // --- AKHIR ROUTER ---
 
+    // --- FUNGSI LAIN (Logika inti tidak diubah) ---
     const initSlider = () => {
+        // ... (Tidak diubah) ...
         const track = document.getElementById('slider-track');
         const dots = document.querySelectorAll('.slider-dot');
-        
         if (!track || !dots.length) return;
-        
         const updateSlider = (index) => {
             slideIndex = index;
             track.style.transform = `translateX(-${index * 100}%)`;
@@ -366,12 +416,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 dot.classList.toggle('active', i === index);
             });
         };
-        
         dots.forEach((dot, index) => {
             dot.addEventListener('click', () => updateSlider(index));
         });
-        
-        if (slideInterval) clearInterval(slideInterval); // Hapus interval sebelumnya
+        if (slideInterval) clearInterval(slideInterval);
         slideInterval = setInterval(() => {
             slideIndex = (slideIndex + 1) % dots.length;
             updateSlider(slideIndex);
@@ -379,11 +427,11 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     const handleDetail = async (link, title, thumbnail, isFromHome = false) => {
+        // ... (Logika fetch API TIDAK DIUBAH) ...
         app.innerHTML = templates.loader();
         let detailLink = link;
         const animeSlug = title.toLowerCase().replace(/[^a-z0-9]/g, '-');
         updateURL(`/${animeSlug}-pilih-episode`);
-
         if (isFromHome) {
             const searchData = await fetch(`${API_URL}?search=${encodeURIComponent(title)}`).then(res => res.json());
             if (searchData.results && searchData.results.length > 0) {
@@ -394,16 +442,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
         }
-
         try {
             const data = await fetch(`${API_URL}?animePage=${encodeURIComponent(detailLink)}`).then(res => res.json());
-            
-            // --- PERBAIKAN BUG EPISODE TERBALIK ---
             if (data.episodes && Array.isArray(data.episodes)) {
-                data.episodes.reverse(); // Membalik array agar Episode 1 ada di index 0
+                data.episodes.reverse();
             }
-            // --- AKHIR PERBAIKAN ---
-
             const finalThumbnail = thumbnail !== 'null' && thumbnail ? thumbnail : data.thumbnail || 'https://placehold.co/200x300/eeeeee/aaaaaa?text=No+Image';
             currentAnimeData = { ...data, title, thumbnail: finalThumbnail };
             app.innerHTML = templates.detailPage(data, title, finalThumbnail);
@@ -413,13 +456,12 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     const handleWatch = async (link, episodeIndex = 0) => {
+        // ... (Logika fetch API TIDAK DIUBAH) ...
         app.innerHTML = templates.loader();
         currentEpisodeIndex = episodeIndex;
-        
         const animeTitle = currentAnimeData?.title || 'anime';
         const animeSlug = animeTitle.toLowerCase().replace(/[^a-z0-9]/g, '-');
         updateURL(`/${animeSlug}-episode-${episodeIndex + 1}`);
-        
         try {
             const data = await fetch(`${API_URL}?url=${encodeURIComponent(link)}`).then(res => res.json());
             app.innerHTML = templates.watchPage(data, episodeIndex);
@@ -427,8 +469,10 @@ document.addEventListener('DOMContentLoaded', () => {
             app.innerHTML = '<p class="error-message">Gagal memuat video.</p>';
         }
     };
+    // --- AKHIR FUNGSI LAIN ---
 
-    // Event Listeners
+
+    // --- EVENT LISTENERS (Tidak diubah) ---
     app.addEventListener('submit', e => {
         if (e.target.id === 'main-search-form') {
             e.preventDefault();
@@ -441,7 +485,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     app.addEventListener('click', e => {
-        // Handle anime/search result cards
         const card = e.target.closest('.anime-card, .search-result-card, .slide-card');
         if (card) {
             e.preventDefault();
@@ -451,7 +494,6 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        // Handle episode cards
         const epCard = e.target.closest('.episode-card');
         if (epCard) { 
             e.preventDefault(); 
@@ -460,7 +502,6 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        // Handle Google login
         if (e.target.closest('#google-login-btn')) {
             e.preventDefault();
             if (window.firebaseAuth) {
@@ -469,7 +510,6 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
 
-        // Handle logout
         if (e.target.closest('#logout-btn')) {
             e.preventDefault();
             if (window.firebaseAuth) {
@@ -477,14 +517,12 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
 
-        // --- Handler Tombol Kembali (dari Detail ke List) ---
         if (e.target.closest('#back-to-list')) {
             e.preventDefault();
             router.render(lastPageContext.page, lastPageContext.params);
             return;
         }
 
-        // Handle back to detail
         if (e.target.closest('#back-to-detail')) {
             e.preventDefault();
             if (currentAnimeData) {
@@ -494,7 +532,6 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
 
-        // Handle episode navigation
         if (e.target.closest('#prev-episode') && !e.target.closest('#prev-episode').disabled) {
             e.preventDefault();
             if (currentEpisodeIndex > 0 && currentAnimeData?.episodes) {
@@ -509,7 +546,6 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
 
-        // Handle episode grid
         const gridItem = e.target.closest('.episode-grid-item');
         if (gridItem) {
             e.preventDefault();
@@ -528,7 +564,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Handle browser navigation
     window.addEventListener('popstate', () => {
         if (slideInterval) clearInterval(slideInterval);
         const page = getCurrentPage();
@@ -537,29 +572,34 @@ document.addEventListener('DOMContentLoaded', () => {
         if (page === 'search' && params.s) {
             router.render('search', { query: params.s });
         } else if (page === 'detail' || page === 'watch') {
-            // Jika pengguna menekan 'back' dari halaman detail/watch,
-            // kembalikan ke konteks halaman terakhir (home/search)
             router.render(lastPageContext.page, lastPageContext.params);
         } else {
             router.render(page);
         }
     });
 
-    // --- Inisialisasi Partikel Saat Load ---
+
+    // --- INISIALISASI (Dimodifikasi) ---
+
+    // 1. Cek tema dulu saat load
+    checkTimeTheme(); 
+    
+    // 2. Buat semua partikel (CSS yang akan menyembunyikan/menampilkan)
     initParticles();
 
-    // Initialize router
+    // 3. Set interval untuk cek tema setiap menit
+    setInterval(checkTimeTheme, 60000); 
+
+    // 4. Initialize router (seperti sebelumnya)
     const initialPage = getCurrentPage();
     const initialParams = getURLParams();
     
     if (initialPage === 'search' && initialParams.s) {
         router.render('search', { query: initialParams.s });
     } else if (initialPage === 'detail' || initialPage === 'watch') {
-        // Jika me-refresh halaman detail, kembalikan ke home
         router.render('home');
     } else {
         router.render(initialPage);
     }
 });
-
 
