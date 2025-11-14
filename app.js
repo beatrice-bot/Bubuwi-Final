@@ -2,7 +2,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const app = document.getElementById('app-content');
     const bottomNav = document.querySelector('.bottom-nav');
 
-    const API_URL = "https://bubuwi-pro.netlify.app/api/scrape";
+    const API_URL = "https://bubuwi.netlify.app/api/scrape";
     
     let currentUser = null;
     let currentAnimeData = null;
