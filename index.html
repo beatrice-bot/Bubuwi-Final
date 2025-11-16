@@ -20,8 +20,8 @@
         try {
             // Dapatkan jam dalam format 24 jam untuk zona waktu Asia/Jakarta (WIB)
             const wibHour = parseInt(new Date().toLocaleString('en-US', { timeZone: 'Asia/Jakarta', hour: '2-digit', hour12: false }));
-            // Jam 5 sore (17) sampai 6 pagi (5) adalah malam
-            if (wibHour >= 17 || wibHour < 6) {
+            // Jam 6 sore (18) sampai 5 pagi (5) adalah malam
+            if (wibHour >= 18 || wibHour < 5) {
                 document.documentElement.classList.add('night-mode');
             }
         } catch (e) {
